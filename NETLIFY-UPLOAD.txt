@@ -1,0 +1,9 @@
+QUESO V5 — NETLIFY-READY
+
+Upload this entire folder to https://app.netlify.com/drop
+
+Important:
+- Upload the folder itself, not only the site subfolder.
+- Keep the folder structure unchanged.
+- The public root automatically opens the homepage.
+- This is a static prototype. Checkout and forms demonstrate the intended flow but do not process real payments or submissions.
