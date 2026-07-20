@@ -66,7 +66,14 @@
 
   class QuesoFlavorFormats extends HTMLElement {
     static get observedAttributes() {
-      const attributes = ["eyebrow", "title", "copy", "button-label", "button-url"];
+      const attributes = [
+        "eyebrow",
+        "title",
+        "copy",
+        "footer-note",
+        "button-label",
+        "button-url"
+      ];
 
       for (let index = 1; index <= 4; index += 1) {
         attributes.push(
@@ -124,6 +131,10 @@
         "copy",
         "Once the flavor is decided, choose the cake format that fits the occasion."
       );
+      const footerNote = this.value(
+        "footer-note",
+        "Pick the flavor. Pick the format. We’ll handle the baking."
+      );
       const buttonLabel = this.value("button-label", "See all cakes");
       const buttonUrl = this.value("button-url", "/cakes");
 
@@ -146,7 +157,6 @@
             --pink: #efa3b5;
             --purple: #b99ad2;
             --pad: clamp(20px, 5vw, 76px);
-
             display: block;
             width: 100%;
             height: 100%;
@@ -159,20 +169,9 @@
             font-synthesis: none;
           }
 
-          :host([data-wix-frame]) {
-            height: auto;
-          }
-
-          *,
-          *::before,
-          *::after {
-            box-sizing: border-box;
-          }
-
-          a {
-            color: inherit;
-            text-decoration: none;
-          }
+          :host([data-wix-frame]) { height: auto; }
+          *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; text-decoration: none; }
 
           .formats {
             width: 100%;
@@ -208,8 +207,7 @@
             text-transform: uppercase;
           }
 
-          h2,
-          h3 {
+          h2, h3 {
             margin: 0;
             font-family: "Lovelo", Arial, sans-serif;
             font-weight: 900;
@@ -235,7 +233,6 @@
           }
 
           .format-card {
-            position: relative;
             min-width: 0;
             min-height: 370px;
             padding: 26px;
@@ -253,7 +250,6 @@
           .format-card--purple { background: var(--purple); transform: rotate(0.35deg); }
 
           .format-card__number {
-            display: block;
             font-family: "Lovelo", Arial, sans-serif;
             font-size: 48px;
             font-weight: 900;
@@ -315,59 +311,22 @@
             transition: transform 150ms ease;
           }
 
-          .button:hover,
-          .button:focus-visible {
-            transform: translateY(-2px);
-          }
-
-          .button:focus-visible {
-            outline: 3px solid var(--yellow);
-            outline-offset: 3px;
-          }
+          .button:hover, .button:focus-visible { transform: translateY(-2px); }
+          .button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 
           @media (max-width: 1100px) {
-            .formats__heading {
-              grid-template-columns: 1fr;
-              gap: 18px;
-            }
-
-            .format-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            .formats__heading { grid-template-columns: 1fr; gap: 18px; }
+            .format-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           }
 
           @media (max-width: 760px) {
-            .formats {
-              padding: 58px 20px;
-            }
-
-            .formats__heading {
-              margin-bottom: 32px;
-            }
-
-            h2 {
-              font-size: clamp(48px, 14vw, 68px);
-            }
-
-            .format-grid {
-              grid-template-columns: 1fr;
-              gap: 18px;
-            }
-
-            .format-card {
-              min-height: 300px;
-              padding: 22px;
-              box-shadow: 5px 5px 0 var(--brown);
-            }
-
-            .footer-row {
-              align-items: stretch;
-              flex-direction: column;
-            }
-
-            .button {
-              width: 100%;
-            }
+            .formats { padding: 58px 20px; }
+            .formats__heading { margin-bottom: 32px; }
+            h2 { font-size: clamp(48px, 14vw, 68px); }
+            .format-grid { grid-template-columns: 1fr; gap: 18px; }
+            .format-card { min-height: 300px; padding: 22px; box-shadow: 5px 5px 0 var(--brown); }
+            .footer-row { align-items: stretch; flex-direction: column; }
+            .button { width: 100%; }
           }
         </style>
 
@@ -380,12 +339,10 @@
             <p class="intro-copy">${this.escape(copy)}</p>
           </header>
 
-          <div class="format-grid">
-            ${cards}
-          </div>
+          <div class="format-grid">${cards}</div>
 
           <div class="footer-row">
-            <p class="footer-note">The product and CMS connection comes after the full site build.</p>
+            <p class="footer-note">${this.escape(footerNote)}</p>
             <a class="button" href="${this.escape(buttonUrl)}">${this.escape(buttonLabel)}</a>
           </div>
         </section>
