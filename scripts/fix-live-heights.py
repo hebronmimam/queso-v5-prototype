@@ -70,7 +70,7 @@ for filename in COMPONENTS:
         root_selector = ABSOLUTE_ROOT_COMPONENTS[filename]
         root_pattern = re.compile(
             rf"({re.escape(root_selector)}\s*\{{\s*)"
-            r"position:\s*relative;\s*"
+            r"(?:position:\s*relative;\s*)?"
             r"width:\s*100%;\s*"
             r"height:\s*100%;",
             re.MULTILINE,
