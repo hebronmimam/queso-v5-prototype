@@ -5,7 +5,75 @@
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
+  const repoAsset = (path) => new URL(path, REPO_ROOT).href;
   const IS_WIX_FRAME = window.self !== window.top;
+
+  const EDITOR_PREVIEW_PRODUCT = {
+    id: "queso-editor-preview",
+    name: "Birthday Suit",
+    description: "Naked, playful and ready for birthdays, tiny wins and big news.",
+    formattedPrice: "HK$368.00",
+    ribbon: "Editor preview",
+    inStock: true,
+    manageVariants: false,
+    media: [
+      {
+        type: "image",
+        src: repoAsset("assets/generated-campaign/02-birthday-suit.png"),
+        alt: "Birthday Suit cheesecake"
+      },
+      {
+        type: "image",
+        src: repoAsset("site/assets/v3-originals/birthday-slice-detail.png"),
+        alt: "Birthday Suit slice detail"
+      },
+      {
+        type: "image",
+        src: repoAsset("site/assets/v3-originals/hero-birthday-wide.png"),
+        alt: "Birthday Suit serving view"
+      }
+    ],
+    options: [
+      {
+        name: "Flavour",
+        choices: [
+          { value: "Classic", label: "Classic", visible: true, inStock: true },
+          { value: "Chocolate", label: "Chocolate", visible: true, inStock: true },
+          { value: "Lemon", label: "Lemon", visible: true, inStock: true },
+          { value: "Caramel", label: "Caramel", visible: true, inStock: true }
+        ]
+      },
+      {
+        name: "Size",
+        choices: [
+          { value: "Standard", label: "Standard", visible: true, inStock: true },
+          { value: "Large", label: "Large", visible: true, inStock: true }
+        ]
+      }
+    ],
+    initialChoices: {
+      Flavour: "Classic",
+      Size: "Standard"
+    },
+    details: [
+      {
+        title: "Product information",
+        description: "Birthday Suit is Queso's party-ready format: the family cheesecake recipe, kept playful and ready for the candles."
+      },
+      {
+        title: "Ingredients & allergens",
+        description: "Contains dairy, egg and wheat. Contact Queso before ordering if you have an allergy or dietary restriction."
+      },
+      {
+        title: "Cheesecake care",
+        description: "Best served chilled. Refrigerate leftovers and do not reheat."
+      },
+      {
+        title: "When will my cheesecake arrive?",
+        description: "Choose delivery or pickup during checkout. Final handoff details are confirmed by email."
+      }
+    ]
+  };
 
   function installFonts() {
     if (document.head.querySelector("style[data-queso-product-detail-fonts]")) return;
@@ -99,8 +167,16 @@
         .replaceAll("'", "&#039;");
     }
 
-    get product() {
+    get suppliedProduct() {
       return this.parseJson("product-data", null);
+    }
+
+    get isEditorPreview() {
+      return !this.suppliedProduct && IS_WIX_FRAME;
+    }
+
+    get product() {
+      return this.suppliedProduct || (this.isEditorPreview ? EDITOR_PREVIEW_PRODUCT : null);
     }
 
     get availability() {
@@ -117,16 +193,188 @@
           : [];
     }
 
+    normalizeMedia(item, index) {
+      const image = item?.image || {};
+      const video = item?.video || {};
+      const src = String(
+        item?.src ||
+        item?.url ||
+        item?.fileUrl ||
+        item?.videoUrl ||
+        video?.url ||
+        video?.src ||
+        image?.url ||
+        image?.src ||
+        ""
+      ).trim();
+
+      if (!src) return null;
+
+      const poster = String(
+        item?.poster ||
+        item?.posterUrl ||
+        item?.thumbnail ||
+        item?.thumbnailUrl ||
+        item?.previewImage ||
+        video?.poster ||
+        video?.posterUrl ||
+        video?.thumbnail ||
+        video?.thumbnailUrl ||
+        video?.image?.url ||
+        ""
+      ).trim();
+
+      const typeValue = [
+        item?.type,
+        item?.mediaType,
+        item?.media_type,
+        item?.mimeType,
+        item?.mime_type,
+        video?.mimeType,
+        video?.type
+      ].filter(Boolean).join(" ").toLowerCase();
+
+      const label = String(
+        item?.alt ||
+        item?.title ||
+        item?.name ||
+        item?.fileName ||
+        item?.filename ||
+        (index === 0 ? this.product?.name : `Product media ${index + 1}`) ||
+        "Queso product media"
+      );
+
+      const looksLikeVideo =
+        typeValue.includes("video") ||
+        src.startsWith("wix:video://") ||
+        /\.(mp4|webm|mov|m4v|ogv)(?:$|[?#])/i.test(src);
+
+      return {
+        ...item,
+        type: looksLikeVideo ? "video" : "image",
+        src,
+        poster,
+        alt: label
+      };
+    }
+
     get media() {
       const availabilityMedia = this.availability?.media;
       const productMedia = this.product?.media;
-      const media = Array.isArray(availabilityMedia) && availabilityMedia.length
+      const rawMedia = Array.isArray(availabilityMedia) && availabilityMedia.length
         ? availabilityMedia
         : Array.isArray(productMedia)
           ? productMedia
           : [];
 
-      return media.filter((item) => item?.src);
+      return rawMedia
+        .map((item, index) => this.normalizeMedia(item, index))
+        .filter(Boolean);
+    }
+
+    videoSources(media) {
+      const src = String(media?.src || "").trim();
+      if (!src) return [];
+
+      if (/^https?:\/\//i.test(src)) return [src];
+
+      if (src.startsWith("wix:video://")) {
+        const path = src.replace(/^wix:video:\/\/v1\//i, "").split("#")[0];
+        const mediaId = path.split("/")[0];
+
+        if (!mediaId) return [];
+
+        return [
+          `https://video.wixstatic.com/video/${mediaId}/720p/mp4/file.mp4`,
+          `https://video.wixstatic.com/video/${mediaId}/480p/mp4/file.mp4`,
+          `https://video.wixstatic.com/video/${mediaId}/360p/mp4/file.mp4`
+        ];
+      }
+
+      return [src];
+    }
+
+    renderMainMedia(media, product) {
+      if (!media?.src) return "";
+
+      if (media.type === "video") {
+        const sources = this.videoSources(media)
+          .map((src) => `<source src="${this.escape(src)}" type="video/mp4">`)
+          .join("");
+
+        return `
+          <video
+            class="gallery-main gallery-video"
+            controls
+            playsinline
+            preload="metadata"
+            ${media.poster ? `poster="${this.escape(media.poster)}"` : ""}
+            aria-label="${this.escape(media.alt || product.name || "Product video")}" 
+          >
+            ${sources}
+            Your browser does not support HTML video.
+          </video>
+        `;
+      }
+
+      return `
+        <img
+          class="gallery-main"
+          src="${this.escape(media.src)}"
+          alt="${this.escape(media.alt || product.name)}"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        >
+      `;
+    }
+
+    renderThumbnail(media, index, product) {
+      const selected = index === this.activeImage;
+      const label = media.type === "video"
+        ? `Play product video ${index + 1}`
+        : `Show product photo ${index + 1}`;
+
+      let visual = "";
+
+      if (media.type === "video") {
+        visual = media.poster
+          ? `
+            <span class="thumb-media">
+              <img src="${this.escape(media.poster)}" alt="" loading="lazy" decoding="async">
+              <span class="thumb-play" aria-hidden="true">▶</span>
+            </span>
+          `
+          : `
+            <span class="thumb-media thumb-video-placeholder" aria-hidden="true">
+              <span class="thumb-play">▶</span>
+              <span>Video</span>
+            </span>
+          `;
+      } else {
+        visual = `
+          <span class="thumb-media">
+            <img
+              src="${this.escape(media.src)}"
+              alt="${this.escape(media.alt || product.name)}"
+              loading="lazy"
+              decoding="async"
+            >
+          </span>
+        `;
+      }
+
+      return `
+        <button
+          class="thumb${selected ? " is-active" : ""}"
+          type="button"
+          data-image-index="${index}"
+          aria-label="${this.escape(label)}"
+          aria-pressed="${String(selected)}"
+        >
+          ${visual}
+        </button>
+      `;
     }
 
     syncSelections(reset) {
@@ -214,22 +462,16 @@
 
       const media = this.media;
       if (this.activeImage >= media.length) this.activeImage = 0;
-      const activeImage = media[this.activeImage] || {
+      const activeMedia = media[this.activeImage] || this.normalizeMedia({
+        type: "image",
         src: product.mainImage || "",
         alt: product.name || "Queso cheesecake"
-      };
+      }, 0);
 
-      const thumbs = media.map((image, index) => `
-        <button
-          class="thumb${index === this.activeImage ? " is-active" : ""}"
-          type="button"
-          data-image-index="${index}"
-          aria-label="Show product photo ${index + 1}"
-          aria-pressed="${String(index === this.activeImage)}"
-        >
-          <img src="${this.escape(image.src)}" alt="${this.escape(image.alt || product.name)}" loading="lazy" decoding="async">
-        </button>
-      `).join("");
+      const mainMedia = this.renderMainMedia(activeMedia, product);
+      const thumbs = media
+        .map((item, index) => this.renderThumbnail(item, index, product))
+        .join("");
 
       const optionGroups = this.options.map((option, optionIndex) => {
         const choices = Array.isArray(option.choices) ? option.choices : [];
@@ -300,8 +542,18 @@
       const cartState = this.value("cart-state", "idle").toLowerCase();
       const cartMessage = this.value("cart-message", "");
       const isAdding = cartState === "adding";
-      const disabled = isAdding || !this.isAvailable;
-      const buttonLabel = isAdding ? "Adding…" : this.isAvailable ? "Add to cart" : "Unavailable";
+      const disabled = this.isEditorPreview || isAdding || !this.isAvailable;
+      const buttonLabel = this.isEditorPreview
+        ? "Add to cart"
+        : isAdding
+          ? "Adding…"
+          : this.isAvailable
+            ? "Add to cart"
+            : "Unavailable";
+      const mediaLabel = activeMedia?.type === "video" ? "Video" : "Photo";
+      const mediaCounter = media.length
+        ? `${mediaLabel} ${this.activeImage + 1} of ${media.length}`
+        : mediaLabel;
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -328,7 +580,7 @@
           :host([data-wix-frame]) { height:auto; }
           *,*::before,*::after { box-sizing:border-box; }
           button,input { color:inherit; font:inherit; }
-          img { display:block; max-width:100%; }
+          img,video { display:block; max-width:100%; }
 
           .product-page {
             width:100%;
@@ -353,65 +605,143 @@
             align-items:start;
           }
 
-          .gallery-shell { position:sticky; top:18px; }
+          .gallery-shell {
+            min-width:0;
+            position:sticky;
+            top:18px;
+          }
 
           .gallery-stage {
             position:relative;
             overflow:hidden;
+            aspect-ratio:1;
             border:2px solid var(--brown);
             background:#fff;
           }
 
           .gallery-main {
             width:100%;
-            aspect-ratio:1;
+            height:100%;
             object-fit:cover;
+          }
+
+          .gallery-video {
+            background:#18100b;
+            object-fit:contain;
           }
 
           .gallery-count {
             position:absolute;
             right:15px;
             bottom:15px;
+            z-index:2;
             padding:7px 10px;
             border:1px solid var(--brown);
             background:var(--cream);
             font-size:9px;
             font-weight:850;
             text-transform:uppercase;
+            pointer-events:none;
           }
 
           .thumbs {
             margin-top:8px;
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+            display:flex;
             gap:8px;
+            overflow-x:auto;
+            overflow-y:hidden;
+            padding:4px 2px 10px;
+            scroll-snap-type:x proximity;
+            scrollbar-width:thin;
+            scrollbar-color:var(--orange) transparent;
           }
 
+          .thumbs::-webkit-scrollbar { height:7px; }
+          .thumbs::-webkit-scrollbar-track { background:transparent; }
+          .thumbs::-webkit-scrollbar-thumb { background:var(--orange); border-radius:999px; }
+
           .thumb {
+            flex:0 0 clamp(88px,9vw,116px);
             padding:0;
             border:0;
             background:transparent;
             cursor:pointer;
             opacity:.62;
+            scroll-snap-align:start;
             transition:opacity 150ms ease,transform 150ms ease;
           }
 
-          .thumb img {
+          .thumb-media {
+            position:relative;
+            display:grid;
+            place-items:center;
             width:100%;
             aspect-ratio:1.2;
-            object-fit:cover;
+            overflow:hidden;
             border:2px solid var(--brown);
+            background:#fff;
           }
 
-          .thumb:hover,.thumb:focus-visible,.thumb.is-active { opacity:1; transform:translateY(-3px); }
-          .thumb.is-active img { outline:4px solid var(--orange); outline-offset:-4px; }
+          .thumb-media img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+          }
+
+          .thumb-video-placeholder {
+            gap:6px;
+            align-content:center;
+            background:var(--brown);
+            color:#fff;
+            font-size:9px;
+            font-weight:850;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+          }
+
+          .thumb-play {
+            position:absolute;
+            inset:50% auto auto 50%;
+            display:grid;
+            place-items:center;
+            width:34px;
+            height:34px;
+            transform:translate(-50%,-50%);
+            border:1px solid currentColor;
+            border-radius:50%;
+            background:rgba(253,243,230,.88);
+            color:var(--brown);
+            font-size:12px;
+            line-height:1;
+            padding-left:2px;
+          }
+
+          .thumb-video-placeholder .thumb-play {
+            position:static;
+            transform:none;
+            background:var(--cream);
+          }
+
+          .thumb:hover,.thumb:focus-visible,.thumb.is-active {
+            opacity:1;
+            transform:translateY(-3px);
+          }
+
+          .thumb.is-active .thumb-media {
+            outline:4px solid var(--orange);
+            outline-offset:-4px;
+          }
 
           .thumb:focus-visible,.option:focus-visible,.add-to-cart:focus-visible,input:focus-visible {
             outline:4px solid var(--orange);
             outline-offset:2px;
           }
 
-          .product-panel { min-width:0; position:sticky; top:25px; }
+          .product-panel {
+            min-width:0;
+            position:sticky;
+            top:25px;
+          }
 
           .tag {
             display:inline-flex;
@@ -517,6 +847,7 @@
             .product-page { padding:35px 20px; }
             h1 { font-size:56px; }
             .qty-row { grid-template-columns:85px 1fr; }
+            .thumb { flex-basis:86px; }
           }
         </style>
 
@@ -524,19 +855,10 @@
           <div class="product-layout">
             <div class="gallery-shell">
               <div class="gallery-stage">
-                ${activeImage.src ? `
-                  <img
-                    class="gallery-main"
-                    src="${this.escape(activeImage.src)}"
-                    alt="${this.escape(activeImage.alt || product.name)}"
-                    loading="eager"
-                    fetchpriority="high"
-                    decoding="async"
-                  >
-                ` : ""}
-                <span class="gallery-count">Select a photo</span>
+                ${mainMedia}
+                <span class="gallery-count">${this.escape(mediaCounter)}</span>
               </div>
-              ${thumbs ? `<div class="thumbs">${thumbs}</div>` : ""}
+              ${thumbs ? `<div class="thumbs" aria-label="Product media">${thumbs}</div>` : ""}
             </div>
 
             <section class="product-panel" aria-labelledby="queso-product-title">
@@ -585,6 +907,8 @@
           this.render();
           this.bindEvents();
 
+          if (this.isEditorPreview) return;
+
           this.dispatchEvent(new CustomEvent("queso-product-options-change", {
             bubbles: true,
             composed: true,
@@ -608,6 +932,8 @@
 
       const addButton = this.shadowRoot.querySelector("[data-add-to-cart]");
       addButton?.addEventListener("click", () => {
+        if (this.isEditorPreview) return;
+
         const requiredMissing = this.customTextFields.some((field, index) => {
           if (!(field.mandatory || field.required)) return false;
           const title = String(field.title || field.name || `Custom text ${index + 1}`);
