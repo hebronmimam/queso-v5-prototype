@@ -38,8 +38,6 @@
       return [
         "eyebrow",
         "title",
-        "copy",
-        "note",
         "submit-label",
         "form-state",
         "form-message",
@@ -97,33 +95,27 @@
       if (!form.reportValidity()) return;
 
       const data = Object.fromEntries(new FormData(form).entries());
+      const firstName = String(data.firstName || "");
+      const lastName = String(data.lastName || "");
 
       this.dispatchEvent(new CustomEvent("queso-contact-submit", {
         bubbles: true,
         composed: true,
         detail: {
-          inquiryType: String(data.inquiryType || ""),
-          name: String(data.name || ""),
+          firstName,
+          lastName,
+          name: `${firstName} ${lastName}`.trim(),
           email: String(data.email || ""),
-          phone: String(data.phone || ""),
-          preferredDate: String(data.preferredDate || ""),
+          inquiryType: String(data.inquiryType || ""),
           message: String(data.message || "")
         }
       }));
     }
 
     render() {
-      const eyebrow = this.value("eyebrow", "Send the details");
-      const title = this.value("title", "Tell us what you need.");
-      const copy = this.value(
-        "copy",
-        "Use the form for order questions, custom cake ideas, popup enquiries, partnerships and everything in between."
-      );
-      const note = this.value(
-        "note",
-        "For time-sensitive orders, include the preferred date and serving size in your message."
-      );
-      const submitLabel = this.value("submit-label", "Send enquiry");
+      const eyebrow = this.value("eyebrow", "Choose the right route");
+      const title = this.value("title", "How can we help?");
+      const submitLabel = this.value("submit-label", "Send message");
       const formState = this.value("form-state", "idle").toLowerCase();
       const formMessage = this.value("form-message", "");
       const isSending = formState === "sending";
@@ -138,9 +130,7 @@
             --cream: #fdf3e6;
             --yellow: #f4c24a;
             --brown: #3d2416;
-            --pink: #efa3b5;
-            --purple: #b99ad2;
-            --pad: clamp(22px, 5vw, 76px);
+            --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
             height: 100%;
@@ -151,190 +141,168 @@
             font-family: "Quicksand", Arial, sans-serif;
             font-weight: 550;
             font-synthesis: none;
+            text-rendering: geometricPrecision;
           }
 
           :host([data-wix-frame]) { height: auto; }
           *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; }
           input, select, textarea, button { color: inherit; font: inherit; }
 
-          .contact {
+          .section {
             width: 100%;
             height: 100%;
             min-height: 0;
-            display: grid;
-            grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+            padding: clamp(76px, 9vw, 130px) var(--pad);
             overflow: hidden;
             background: var(--cream);
-            border-block: 2px solid var(--brown);
           }
 
-          :host([data-wix-frame]) .contact {
+          :host([data-wix-frame]) .section {
             position: fixed;
             inset: 0;
             width: auto;
             height: auto;
           }
 
-          .intro {
-            position: relative;
-            min-width: 0;
-            padding: var(--pad);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            overflow: hidden;
-            background: var(--brown);
-            color: var(--cream);
-            border-right: 2px solid var(--brown);
+          .contact-layout {
+            display: grid;
+            grid-template-columns: 0.85fr 1.15fr;
+            gap: 45px;
+            align-items: start;
           }
 
           .eyebrow {
             margin: 0 0 17px;
-            color: var(--yellow);
-            font-size: 11px;
+            color: #a84c09;
+            font-size: 12px;
             font-weight: 850;
             letter-spacing: 0.13em;
             text-transform: uppercase;
           }
 
-          h2 {
-            max-width: 760px;
+          h2,
+          h3 {
             margin: 0;
             font-family: "Lovelo", Arial, sans-serif;
-            font-size: clamp(58px, 6.9vw, 108px);
             font-weight: 900;
-            line-height: 0.91;
             text-transform: uppercase;
           }
 
-          .lead {
-            max-width: 540px;
-            margin: 27px 0 0;
-            font-size: clamp(16px, 1.35vw, 19px);
-            line-height: 1.6;
-          }
-
-          .note {
-            max-width: 540px;
-            margin: 36px 0 0;
-            padding-top: 17px;
-            border-top: 2px solid var(--cream);
-            font-size: 10px;
-            font-weight: 850;
-            letter-spacing: 0.07em;
-            line-height: 1.52;
-            text-transform: uppercase;
-          }
-
-          .spark {
-            position: absolute;
-            right: 28px;
-            bottom: 18px;
-            color: var(--pink);
-            font-family: "Lovelo", Arial, sans-serif;
-            font-size: clamp(78px, 8vw, 126px);
+          h2 {
+            font-size: clamp(48px, 6vw, 88px);
             line-height: 1;
-            opacity: 0.45;
-            transform: rotate(10deg);
           }
 
-          .form-panel {
-            min-width: 0;
-            padding: clamp(42px, 5vw, 76px);
-            display: flex;
-            align-items: center;
-            background: var(--cream);
+          .contact-options {
+            margin-top: 36px;
+            display: grid;
+            gap: 11px;
+          }
+
+          .contact-card {
+            padding: 24px;
+            border: 2px solid var(--brown);
+            background: #fff;
+          }
+
+          .contact-card:nth-child(2) { background: var(--yellow); }
+
+          .contact-card h3 {
+            font-size: 23px;
+            line-height: 1;
+          }
+
+          .contact-card p {
+            margin: 8px 0 0;
+            font-size: 13px;
+            line-height: 1.55;
+          }
+
+          .contact-form {
+            padding: 30px;
+            border: 2px solid var(--brown);
+            background: #fff;
           }
 
           form {
-            width: 100%;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
           }
 
           .field {
             min-width: 0;
-            display: grid;
-            gap: 8px;
-          }
-
-          .field--wide { grid-column: 1 / -1; }
-
-          label {
+            display: block;
             font-size: 10px;
             font-weight: 850;
-            letter-spacing: 0.08em;
             text-transform: uppercase;
           }
 
-          input,
-          select,
-          textarea {
+          .field.full { grid-column: 1 / -1; }
+
+          .field input,
+          .field select,
+          .field textarea {
             width: 100%;
+            margin-top: 6px;
+            padding: 12px;
             border: 2px solid var(--brown);
-            border-radius: 11px 6px 13px 8px;
+            border-radius: 7px;
             background: #fff;
             outline: 0;
           }
 
-          input,
-          select {
-            min-height: 54px;
-            padding: 0 15px;
-          }
+          .field input,
+          .field select { min-height: 48px; }
 
-          textarea {
-            min-height: 170px;
-            padding: 15px;
+          .field textarea {
+            min-height: 130px;
             resize: vertical;
           }
 
-          input:focus,
-          select:focus,
-          textarea:focus {
-            box-shadow: 5px 5px 0 var(--yellow);
+          .field input:focus,
+          .field select:focus,
+          .field textarea:focus {
+            box-shadow: 4px 4px 0 var(--yellow);
           }
 
-          .actions {
+          .button {
             grid-column: 1 / -1;
-            margin-top: 4px;
-            display: grid;
-            gap: 13px;
-          }
-
-          button {
-            min-height: 54px;
-            padding: 0 24px;
+            width: 100%;
+            min-height: 50px;
+            padding: 0 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 2px solid var(--brown);
             border-radius: 10px;
             background: var(--orange);
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 850;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
             cursor: pointer;
             transition: transform 150ms ease;
           }
 
-          button:hover:not(:disabled),
-          button:focus-visible:not(:disabled) {
-            transform: translateY(-2px);
-          }
+          .button:hover:not(:disabled),
+          .button:focus-visible:not(:disabled) { transform: translateY(-2px); }
 
-          button:disabled {
+          .button:disabled {
             cursor: wait;
             opacity: 0.65;
           }
 
-          button:focus-visible {
-            outline: 3px solid var(--pink);
+          .button:focus-visible {
+            outline: 3px solid var(--yellow);
             outline-offset: 3px;
           }
 
           .status {
-            min-height: 20px;
+            grid-column: 1 / -1;
+            min-height: 18px;
             margin: 0;
             font-size: 11px;
             font-weight: 750;
@@ -344,93 +312,86 @@
           .status--success { color: #26723b; }
           .status--error { color: #a52a23; }
 
-          .privacy {
-            margin: 0;
-            font-size: 9px;
-            line-height: 1.5;
-            opacity: 0.8;
-          }
-
           @media (max-width: 900px) {
-            .contact {
-              grid-template-columns: 1fr;
-              grid-template-rows: minmax(0, 0.78fr) minmax(0, 1.22fr);
-            }
-
-            .intro {
-              border-right: 0;
-              border-bottom: 2px solid var(--brown);
-            }
-
-            .form-panel { padding: 44px 20px; }
+            .contact-layout { grid-template-columns: 1fr; }
           }
 
-          @media (max-width: 620px) {
-            .intro { padding: 50px 20px 42px; }
-            .eyebrow { font-size: 9px; }
-            h2 { font-size: clamp(50px, 14vw, 72px); }
-            .lead { margin-top: 20px; font-size: 15px; }
-            .note { margin-top: 25px; font-size: 8px; }
-            .spark { display: none; }
+          @media (max-width: 680px) {
+            .section { padding: 70px 20px; }
+            h2 { font-size: 49px; line-height: 1.02; }
+            .contact-form { padding: 22px; }
             form { grid-template-columns: 1fr; }
-            .field--wide, .actions { grid-column: 1; }
-            textarea { min-height: 150px; }
+            .field.full,
+            .button,
+            .status { grid-column: 1; }
           }
         </style>
 
-        <section class="contact" aria-labelledby="queso-connect-form-title">
-          <div class="intro">
-            <p class="eyebrow">${this.escape(eyebrow)}</p>
-            <h2 id="queso-connect-form-title">${this.escape(title)}</h2>
-            <p class="lead">${this.escape(copy)}</p>
-            <p class="note">${this.escape(note)}</p>
-            <span class="spark" aria-hidden="true">✦</span>
-          </div>
+        <section class="section" id="contact" aria-labelledby="queso-connect-form-title">
+          <div class="contact-layout">
+            <div>
+              <p class="eyebrow">${this.escape(eyebrow)}</p>
+              <h2 id="queso-connect-form-title">${this.escape(title)}</h2>
 
-          <div class="form-panel">
-            <form novalidate>
-              <div class="field field--wide">
-                <label for="inquiryType">What is this about?</label>
-                <select id="inquiryType" name="inquiryType" required>
-                  <option value="">Choose one</option>
-                  <option value="Order help">Order help</option>
-                  <option value="Custom cake">Custom cake</option>
-                  <option value="Events and partnerships">Events and partnerships</option>
-                  <option value="Something else">Something else</option>
-                </select>
+              <div class="contact-options">
+                <article class="contact-card">
+                  <h3>Order support</h3>
+                  <p>Include your order number, delivery or pickup date and the best way to reach you.</p>
+                </article>
+
+                <article class="contact-card">
+                  <h3>Ingredients &amp; allergies</h3>
+                  <p>Tell Queso the exact product and flavor before placing an order if you have an allergy or dietary restriction.</p>
+                </article>
+
+                <article class="contact-card">
+                  <h3>General questions</h3>
+                  <p>Email <a href="mailto:hello@quesocakes.com"><strong>hello@quesocakes.com</strong></a> or message <a href="https://www.instagram.com/quesohk/" target="_blank" rel="noopener"><strong>@quesohk</strong></a>.</p>
+                </article>
               </div>
+            </div>
 
-              <div class="field">
-                <label for="name">Name</label>
-                <input id="name" name="name" type="text" autocomplete="name" required>
-              </div>
+            <div class="contact-form">
+              <form novalidate>
+                <label class="field">
+                  First name
+                  <input name="firstName" required autocomplete="given-name">
+                </label>
 
-              <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="email" required>
-              </div>
+                <label class="field">
+                  Last name
+                  <input name="lastName" required autocomplete="family-name">
+                </label>
 
-              <div class="field">
-                <label for="phone">Phone / WhatsApp</label>
-                <input id="phone" name="phone" type="tel" autocomplete="tel">
-              </div>
+                <label class="field full">
+                  Email
+                  <input name="email" required type="email" autocomplete="email">
+                </label>
 
-              <div class="field">
-                <label for="preferredDate">Preferred date</label>
-                <input id="preferredDate" name="preferredDate" type="date">
-              </div>
+                <label class="field full">
+                  I'm getting in touch about
+                  <select name="inquiryType" required>
+                    <option value="">Choose one</option>
+                    <option>Existing order</option>
+                    <option>Delivery or pickup</option>
+                    <option>Ingredients or allergies</option>
+                    <option>Cheesecake care</option>
+                    <option>General question</option>
+                  </select>
+                </label>
 
-              <div class="field field--wide">
-                <label for="message">Tell us more</label>
-                <textarea id="message" name="message" required></textarea>
-              </div>
+                <label class="field full">
+                  Message
+                  <textarea name="message" required placeholder="Include an order number if you have one."></textarea>
+                </label>
 
-              <div class="actions">
-                <button type="submit" ${isSending ? "disabled" : ""}>${this.escape(isSending ? "Sending…" : submitLabel)}</button>
+                <button class="button" type="submit" ${isSending ? "disabled" : ""}>
+                  ${this.escape(isSending ? "Sending…" : submitLabel)}
+                </button>
+
                 <p class="status${statusClass}" role="status" aria-live="polite">${this.escape(formMessage)}</p>
-                <p class="privacy">Your details are only used to respond to this enquiry.</p>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </section>
       `;
