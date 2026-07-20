@@ -6,7 +6,6 @@
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
   const repoAsset = (path) => new URL(path, REPO_ROOT).href;
-  const IS_WIX_FRAME = window.self !== window.top;
 
   const DEFAULT_SLIDES = [
     {
@@ -47,9 +46,42 @@
     }
   ];
 
+  function installQuesoFonts() {
+    if (document.head.querySelector("style[data-queso-fonts]")) return;
+
+    const style = document.createElement("style");
+    style.dataset.quesoFonts = "true";
+    style.textContent = `
+      @font-face {
+        font-family: "Lovelo";
+        src: url("${FONT_LOVELO}") format("opentype");
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Quicksand";
+        src: url("${FONT_QUICKSAND}") format("truetype");
+        font-weight: 300 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   class QuesoHero extends HTMLElement {
     static get observedAttributes() {
-      const attributes = ["autoplay", "interval", "initial-slide", "sticker", "show-sticker", "show-dots"];
+      const attributes = [
+        "autoplay",
+        "interval",
+        "initial-slide",
+        "sticker",
+        "show-sticker",
+        "show-dots"
+      ];
+
       for (let index = 1; index <= 3; index += 1) {
         attributes.push(
           `slide-${index}-eyebrow`,
@@ -64,6 +96,7 @@
           `slide-${index}-secondary-url`
         );
       }
+
       return attributes;
     }
 
@@ -73,15 +106,11 @@
       this.activeSlide = 0;
       this.timer = null;
       this.touchStartX = 0;
-      this.handleFrameResize = this.syncFrameHeight.bind(this);
     }
 
     connectedCallback() {
+      installQuesoFonts();
       this.activeSlide = this.initialSlide;
-      this.toggleAttribute("data-wix-frame", IS_WIX_FRAME);
-      this.syncFrameHeight();
-      window.addEventListener("resize", this.handleFrameResize);
-      this.preloadFonts();
       this.render();
       this.bindEvents();
       this.startAutoplay();
@@ -89,7 +118,6 @@
 
     disconnectedCallback() {
       this.stopAutoplay();
-      window.removeEventListener("resize", this.handleFrameResize);
     }
 
     attributeChangedCallback() {
@@ -99,32 +127,6 @@
       this.render();
       this.bindEvents();
       this.startAutoplay();
-    }
-
-    syncFrameHeight() {
-      if (!IS_WIX_FRAME) {
-        this.style.removeProperty("--queso-frame-height");
-        return;
-      }
-
-      this.style.setProperty("--queso-frame-height", `${Math.max(window.innerHeight, 1)}px`);
-    }
-
-    preloadFonts() {
-      [
-        [FONT_LOVELO, "font/otf"],
-        [FONT_QUICKSAND, "font/ttf"]
-      ].forEach(([href, type]) => {
-        if (document.head.querySelector(`link[data-queso-font="${href}"]`)) return;
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "font";
-        link.type = type;
-        link.href = href;
-        link.crossOrigin = "anonymous";
-        link.dataset.quesoFont = href;
-        document.head.appendChild(link);
-      });
     }
 
     value(name, fallback = "") {
@@ -148,15 +150,6 @@
       return Number.isFinite(parsed) && parsed >= 2500 ? parsed : 5200;
     }
 
-    escape(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
     get slides() {
       return DEFAULT_SLIDES.map((fallback, index) => {
         const number = index + 1;
@@ -175,7 +168,16 @@
       });
     }
 
-    button(label, url, modifier) {
+    escape(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderButton(label, url, modifier) {
       if (!label || !url) return "";
       return `<a class="button button--${modifier}" href="${this.escape(url)}">${this.escape(label)}</a>`;
     }
@@ -184,37 +186,41 @@
       const slides = this.slides;
       const slidesMarkup = slides.map((slide, index) => `
         <article class="hero-slide${index === this.activeSlide ? " is-active" : ""}" data-slide="${index}" aria-hidden="${index === this.activeSlide ? "false" : "true"}">
-          <img class="hero-slide__image" src="${this.escape(slide.image)}" alt="${this.escape(slide.alt)}" style="object-position:${this.escape(slide.position)}" ${index === this.activeSlide ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+          <img
+            class="hero-slide__image"
+            src="${this.escape(slide.image)}"
+            alt="${this.escape(slide.alt)}"
+            style="object-position:${this.escape(slide.position)}"
+            ${index === this.activeSlide ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'}
+            decoding="async"
+          >
           <div class="hero-slide__overlay" aria-hidden="true"></div>
           <div class="hero-copy">
             <p class="eyebrow">${this.escape(slide.eyebrow)}</p>
-            ${index === 0 ? `<h1 class="display">${this.escape(slide.title)}</h1>` : `<h2 class="display">${this.escape(slide.title)}</h2>`}
+            ${index === 0
+              ? `<h1 class="display">${this.escape(slide.title)}</h1>`
+              : `<h2 class="display">${this.escape(slide.title)}</h2>`}
             <p class="lead">${this.escape(slide.copy)}</p>
-            <div class="actions">${this.button(slide.primaryLabel, slide.primaryUrl, "primary")}${this.button(slide.secondaryLabel, slide.secondaryUrl, "cream")}</div>
+            <div class="actions">
+              ${this.renderButton(slide.primaryLabel, slide.primaryUrl, "primary")}
+              ${this.renderButton(slide.secondaryLabel, slide.secondaryUrl, "cream")}
+            </div>
           </div>
         </article>
       `).join("");
 
-      const dotsMarkup = slides.map((_, index) => `<button class="hero-dot${index === this.activeSlide ? " is-active" : ""}" type="button" data-dot="${index}" aria-label="Show hero slide ${index + 1}" aria-pressed="${index === this.activeSlide ? "true" : "false"}"></button>`).join("");
+      const dotsMarkup = slides.map((_, index) => `
+        <button
+          class="hero-dot${index === this.activeSlide ? " is-active" : ""}"
+          type="button"
+          data-dot="${index}"
+          aria-label="Show hero slide ${index + 1}"
+          aria-pressed="${index === this.activeSlide ? "true" : "false"}"
+        ></button>
+      `).join("");
 
       this.shadowRoot.innerHTML = `
         <style>
-          @font-face {
-            font-family: "Lovelo";
-            src: url("${FONT_LOVELO}") format("opentype");
-            font-weight: 900;
-            font-style: normal;
-            font-display: swap;
-          }
-
-          @font-face {
-            font-family: "Quicksand";
-            src: url("${FONT_QUICKSAND}") format("truetype");
-            font-weight: 300 700;
-            font-style: normal;
-            font-display: swap;
-          }
-
           :host {
             --orange: #ed6011;
             --cream: #fdf3e6;
@@ -224,8 +230,8 @@
             --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
-            height: var(--queso-frame-height, 100%);
-            min-height: 650px;
+            height: 100%;
+            min-height: 0;
             overflow: hidden;
             background: var(--brown);
             color: var(--brown);
@@ -235,13 +241,18 @@
             text-rendering: geometricPrecision;
           }
 
-          :host([data-wix-frame]) {
-            min-height: 0;
+          *, *::before, *::after {
+            box-sizing: border-box;
           }
 
-          *, *::before, *::after { box-sizing: border-box; }
-          a { color: inherit; text-decoration: none; }
-          button { font: inherit; }
+          a {
+            color: inherit;
+            text-decoration: none;
+          }
+
+          button {
+            font: inherit;
+          }
 
           .hero {
             position: relative;
@@ -282,7 +293,12 @@
           .hero-slide__overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, rgba(253, 243, 230, 0.98) 0%, rgba(253, 243, 230, 0.88) 36%, rgba(253, 243, 230, 0.08) 67%);
+            background: linear-gradient(
+              90deg,
+              rgba(253, 243, 230, 0.98) 0%,
+              rgba(253, 243, 230, 0.88) 36%,
+              rgba(253, 243, 230, 0.08) 67%
+            );
           }
 
           .hero-copy {
@@ -320,7 +336,11 @@
             line-height: 1.55;
           }
 
-          .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+          .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
 
           .button {
             min-height: 50px;
@@ -338,10 +358,25 @@
             transition: transform 150ms ease;
           }
 
-          .button:hover, .button:focus-visible { transform: translateY(-2px); }
-          .button:focus-visible, .hero-dot:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
-          .button--primary { background: var(--orange); color: #fff; }
-          .button--cream { background: var(--cream); }
+          .button:hover,
+          .button:focus-visible {
+            transform: translateY(-2px);
+          }
+
+          .button:focus-visible,
+          .hero-dot:focus-visible {
+            outline: 3px solid var(--yellow);
+            outline-offset: 3px;
+          }
+
+          .button--primary {
+            background: var(--orange);
+            color: #fff;
+          }
+
+          .button--cream {
+            background: var(--cream);
+          }
 
           .hero-sticker {
             position: absolute;
@@ -377,32 +412,112 @@
             cursor: pointer;
           }
 
-          .hero-dot.is-active { background: var(--yellow); }
+          .hero-dot.is-active {
+            background: var(--yellow);
+          }
 
           @media (max-width: 980px) {
-            .hero-copy { width: min(600px, 62vw); }
+            .hero-copy {
+              width: min(600px, 62vw);
+            }
           }
 
           @media (max-width: 680px) {
-            :host:not([data-wix-frame]) { min-height: 680px; }
-            .hero-slide__overlay { background: linear-gradient(180deg, rgba(253, 243, 230, 0.98) 0%, rgba(253, 243, 230, 0.8) 46%, rgba(253, 243, 230, 0.05) 78%); }
-            .hero-slide__image { object-position: 62% center !important; }
-            .hero-copy { left: 20px; right: 20px; top: 44%; width: auto; }
-            .display { font-size: 55px; line-height: 1.02; }
-            .lead { margin: 18px 0; font-size: 15px; }
-            .hero-sticker { right: 18px; top: 18px; padding: 10px 14px; font-size: 8px; }
-            .hero-controls { right: 20px; bottom: 25px; }
+            .hero-slide__overlay {
+              background: linear-gradient(
+                180deg,
+                rgba(253, 243, 230, 0.98) 0%,
+                rgba(253, 243, 230, 0.8) 46%,
+                rgba(253, 243, 230, 0.05) 78%
+              );
+            }
+
+            .hero-slide__image {
+              object-position: 62% center !important;
+            }
+
+            .hero-copy {
+              left: 20px;
+              right: 20px;
+              top: 44%;
+              width: auto;
+            }
+
+            .display {
+              font-size: clamp(42px, 14vw, 55px);
+              line-height: 1.02;
+            }
+
+            .lead {
+              margin: 18px 0;
+              font-size: 15px;
+            }
+
+            .hero-sticker {
+              right: 18px;
+              top: 18px;
+              padding: 10px 14px;
+              font-size: 8px;
+            }
+
+            .hero-controls {
+              right: 20px;
+              bottom: 25px;
+            }
+          }
+
+          @media (max-width: 680px) and (max-height: 620px) {
+            .hero-copy {
+              top: 43%;
+            }
+
+            .eyebrow {
+              margin-bottom: 11px;
+              font-size: 10px;
+            }
+
+            .display {
+              font-size: clamp(38px, 12.5vw, 48px);
+            }
+
+            .lead {
+              max-width: 310px;
+              margin: 13px 0;
+              font-size: 13px;
+              line-height: 1.45;
+            }
+
+            .button {
+              min-height: 43px;
+              padding-inline: 17px;
+              font-size: 9px;
+            }
+
+            .hero-sticker {
+              display: none;
+            }
+
+            .hero-controls {
+              bottom: 16px;
+            }
           }
 
           @media (prefers-reduced-motion: reduce) {
-            .hero-slide, .button { transition: none; }
+            .hero-slide,
+            .button {
+              transition: none;
+            }
           }
         </style>
 
         <section class="hero" aria-roledescription="carousel" aria-label="Featured Queso cheesecakes">
           ${slidesMarkup}
-          ${this.bool("show-sticker", true) ? `<div class="hero-sticker">${this.escape(this.value("sticker", "NOT YOUR EVERYDAY CHEESECAKE"))}</div>` : ""}
-          ${this.bool("show-dots", true) ? `<div class="hero-controls" aria-label="Choose a hero slide">${dotsMarkup}</div>` : ""}
+          ${this.bool("show-sticker", true)
+            ? `<div class="hero-sticker">${this.escape(this.value("sticker", "NOT YOUR EVERYDAY CHEESECAKE"))}</div>`
+            : ""}
+          ${this.bool("show-dots", true)
+            ? `<div class="hero-controls" aria-label="Choose a hero slide">${dotsMarkup}</div>`
+            : ""}
         </section>
       `;
     }
@@ -416,16 +531,22 @@
       });
 
       const hero = this.shadowRoot.querySelector(".hero");
-      hero?.addEventListener("mouseenter", () => this.stopAutoplay());
-      hero?.addEventListener("mouseleave", () => this.startAutoplay());
-      hero?.addEventListener("focusin", () => this.stopAutoplay());
-      hero?.addEventListener("focusout", () => this.startAutoplay());
-      hero?.addEventListener("touchstart", (event) => {
+      if (!hero) return;
+
+      hero.addEventListener("mouseenter", () => this.stopAutoplay());
+      hero.addEventListener("mouseleave", () => this.startAutoplay());
+      hero.addEventListener("focusin", () => this.stopAutoplay());
+      hero.addEventListener("focusout", () => this.startAutoplay());
+
+      hero.addEventListener("touchstart", (event) => {
         this.touchStartX = event.changedTouches[0]?.screenX || 0;
       }, { passive: true });
-      hero?.addEventListener("touchend", (event) => {
-        const distance = (event.changedTouches[0]?.screenX || 0) - this.touchStartX;
+
+      hero.addEventListener("touchend", (event) => {
+        const touchEndX = event.changedTouches[0]?.screenX || 0;
+        const distance = touchEndX - this.touchStartX;
         if (Math.abs(distance) < 45) return;
+
         this.showSlide(this.activeSlide + (distance < 0 ? 1 : -1));
         this.restartAutoplay();
       }, { passive: true });
@@ -437,11 +558,13 @@
       if (!slides.length) return;
 
       this.activeSlide = (index + slides.length) % slides.length;
+
       slides.forEach((slide, slideIndex) => {
         const active = slideIndex === this.activeSlide;
         slide.classList.toggle("is-active", active);
         slide.setAttribute("aria-hidden", String(!active));
       });
+
       dots.forEach((dot, dotIndex) => {
         const active = dotIndex === this.activeSlide;
         dot.classList.toggle("is-active", active);
@@ -453,7 +576,10 @@
       if (!this.bool("autoplay", true)) return;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       if (this.timer) return;
-      this.timer = window.setInterval(() => this.showSlide(this.activeSlide + 1), this.interval);
+
+      this.timer = window.setInterval(() => {
+        this.showSlide(this.activeSlide + 1);
+      }, this.interval);
     }
 
     stopAutoplay() {
