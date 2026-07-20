@@ -1,0 +1,35 @@
+name: Fix published Wix heights
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fix-live-heights.yml"
+      - "scripts/fix-live-heights.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  correct-heights:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Correct Custom Element host heights
+        run: python3 scripts/fix-live-heights.py
+
+      - name: Commit corrected components
+        run: |
+          git config user.name "Hebronmimam"
+          git config user.email "mimam.hebron@gmail.com"
+          git add wix-components/dist/*.js
+          if git diff --cached --quiet; then
+            echo "No height corrections were needed."
+            exit 0
+          fi
+          git commit -m "Fix published Wix custom element heights"
+          git push
