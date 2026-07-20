@@ -9,28 +9,24 @@
 
   const DEFAULT_ITEMS = [
     {
-      mark: "01",
-      title: "Fresh first",
-      copy: "Small-batch baking keeps the texture, finish and flavour where they should be: fresh, rich and worth the wait.",
-      className: "cream"
+      icon: "fresh",
+      title: "Licensed kitchen",
+      copy: "Handcrafted fresh in Hong Kong."
     },
     {
-      mark: "02",
-      title: "Full of personality",
-      copy: "The cakes should look and feel unmistakably Queso—bold, playful and never like an anonymous bakery box.",
-      className: "pink"
+      icon: "ingredient",
+      title: "Premium ingredients",
+      copy: "Quality dairy and Valrhona chocolate variations."
     },
     {
-      mark: "03",
-      title: "Made for the moment",
-      copy: "From simple celebrations to personalised Canvas cakes, every format is designed around the occasion it joins.",
-      className: "yellow"
+      icon: "love",
+      title: "Made by hand",
+      copy: "Slight variation is part of the craft."
     },
     {
-      mark: "04",
-      title: "Always evolving",
-      copy: "Monthly drops, new ideas and unexpected flavours keep the menu moving without losing the core Queso character.",
-      className: "orange"
+      icon: "drop",
+      title: "Seasonal flavors",
+      copy: "A new limited flavor each month."
     }
   ];
 
@@ -56,12 +52,13 @@
         font-display: swap;
       }
     `;
+
     document.head.appendChild(style);
   }
 
   class QuesoStoryPrinciples extends HTMLElement {
     static get observedAttributes() {
-      const attributes = ["eyebrow", "title", "copy", "note"];
+      const attributes = ["eyebrow", "title"];
       for (let index = 1; index <= 4; index += 1) {
         attributes.push(`item-${index}-title`, `item-${index}-copy`);
       }
@@ -106,22 +103,14 @@
     }
 
     render() {
-      const eyebrow = this.value("eyebrow", "The Queso way");
-      const title = this.value("title", "What stays true.");
-      const copy = this.value(
-        "copy",
-        "The menu can change. The standard behind it should not."
-      );
-      const note = this.value(
-        "note",
-        "Freshly made • Small batch • Playful by design • Built for celebration"
-      );
+      const eyebrow = this.value("eyebrow", "What Queso stands for");
+      const title = this.value("title", "Fresh, playful, handcrafted.");
 
       const cards = this.items.map((item) => `
-        <article class="principle principle--${item.className}">
-          <span class="principle__mark" aria-hidden="true">${this.escape(item.mark)}</span>
-          <h3>${this.escape(item.title)}</h3>
-          <p>${this.escape(item.copy)}</p>
+        <article class="proof">
+          <span class="brand-icon icon-${this.escape(item.icon)}" aria-hidden="true"></span>
+          <strong>${this.escape(item.title)}</strong>
+          <span>${this.escape(item.copy)}</span>
         </article>
       `).join("");
 
@@ -133,155 +122,205 @@
             --yellow: #f4c24a;
             --brown: #3d2416;
             --pink: #efa3b5;
-            --pad: clamp(22px, 5vw, 76px);
+            --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
             height: 100%;
             min-height: 0;
             overflow: hidden;
-            background: var(--brown);
-            color: var(--cream);
+            background: var(--cream);
+            color: var(--brown);
             font-family: "Quicksand", Arial, sans-serif;
             font-weight: 550;
             font-synthesis: none;
+            text-rendering: geometricPrecision;
           }
 
           :host([data-wix-frame]) { height: auto; }
           *, *::before, *::after { box-sizing: border-box; }
 
-          .principles {
+          .section {
             width: 100%;
             height: 100%;
             min-height: 0;
-            padding: clamp(68px, 7vw, 106px) var(--pad);
+            padding: clamp(76px, 9vw, 130px) var(--pad);
             overflow: hidden;
-            background: var(--brown);
-            border-bottom: 2px solid var(--brown);
+            background: var(--cream);
           }
 
-          :host([data-wix-frame]) .principles {
+          :host([data-wix-frame]) .section {
             position: fixed;
             inset: 0;
             width: auto;
             height: auto;
           }
 
-          .heading {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(280px, 0.44fr);
-            gap: 48px;
-            align-items: end;
-            margin-bottom: 46px;
-          }
+          .section-heading { margin-bottom: 42px; }
 
           .eyebrow {
-            margin: 0 0 15px;
-            color: var(--yellow);
-            font-size: 11px;
+            margin: 0 0 17px;
+            color: #a84c09;
+            font-size: 12px;
             font-weight: 850;
             letter-spacing: 0.13em;
             text-transform: uppercase;
           }
 
-          h2, h3 {
+          h2 {
             margin: 0;
             font-family: "Lovelo", Arial, sans-serif;
+            font-size: clamp(48px, 6vw, 88px);
             font-weight: 900;
+            line-height: 1;
             text-transform: uppercase;
           }
 
-          h2 {
-            max-width: 840px;
-            font-size: clamp(58px, 7vw, 104px);
-            line-height: 0.93;
-          }
-
-          .intro {
-            margin: 0;
-            font-size: clamp(16px, 1.35vw, 19px);
-            line-height: 1.6;
-          }
-
-          .grid {
+          .proof-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(4, 1fr);
+            border: 2px solid var(--brown);
+            background: #fff;
           }
 
-          .principle {
-            min-width: 0;
-            min-height: 280px;
+          .proof {
+            min-height: 190px;
             padding: 28px;
             display: flex;
             flex-direction: column;
-            border: 2px solid var(--cream);
-            border-radius: 18px 8px 22px 10px;
-            box-shadow: 7px 7px 0 var(--cream);
-            color: var(--brown);
+            justify-content: center;
+            border-right: 2px solid var(--brown);
+          }
+
+          .proof:last-child { border-right: 0; }
+
+          .brand-icon {
+            position: relative;
+            display: block;
+            width: 66px;
+            height: 66px;
+            margin-bottom: 18px;
             overflow: hidden;
+            flex: 0 0 auto;
+            border: 2px solid var(--brown);
+            background: var(--yellow);
           }
 
-          .principle--cream { background: var(--cream); }
-          .principle--pink { background: var(--pink); transform: rotate(0.35deg); }
-          .principle--yellow { background: var(--yellow); transform: rotate(-0.35deg); }
-          .principle--orange { background: var(--orange); color: #fff; }
+          .brand-icon::before,
+          .brand-icon::after {
+            content: "";
+            position: absolute;
+            display: block;
+          }
 
-          .principle__mark {
+          .icon-fresh {
+            border-radius: 50%;
+            background: var(--orange);
+          }
+
+          .icon-fresh::before {
+            inset: 15px;
+            background: var(--cream);
+            clip-path: polygon(50% 0,61% 36%,100% 50%,61% 64%,50% 100%,39% 64%,0 50%,39% 36%);
+          }
+
+          .icon-ingredient {
+            border-radius: 48% 48% 12px 48%;
+            background: var(--yellow);
+            transform: rotate(-4deg);
+          }
+
+          .icon-ingredient::before {
+            width: 23px;
+            height: 31px;
+            left: 20px;
+            top: 14px;
+            border: 2px solid var(--brown);
+            border-radius: 55% 15% 55% 15%;
+            background: var(--cream);
+            transform: rotate(35deg);
+          }
+
+          .icon-ingredient::after {
+            width: 8px;
+            height: 8px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 50%;
+            background: var(--orange);
+          }
+
+          .icon-love {
+            border-radius: 16px 16px 32px 32px;
+            background: var(--pink);
+            transform: rotate(3deg);
+          }
+
+          .icon-love::before {
+            content: "♥";
+            inset: 4px;
+            display: grid;
+            place-items: center;
+            color: var(--brown);
+            font-family: Arial, sans-serif;
+            font-size: 42px;
+          }
+
+          .icon-drop {
+            border-radius: 50% 50% 10px 50%;
+            background: var(--orange);
+            transform: rotate(45deg);
+          }
+
+          .icon-drop::before {
+            content: "✦";
+            inset: 0;
+            display: grid;
+            place-items: center;
+            color: var(--yellow);
+            font-size: 31px;
+            transform: rotate(-45deg);
+          }
+
+          .proof strong {
             font-family: "Lovelo", Arial, sans-serif;
-            font-size: 46px;
-            font-weight: 900;
-            line-height: 1;
-            opacity: 0.48;
-          }
-
-          h3 {
-            margin-top: auto;
-            font-size: clamp(32px, 3vw, 48px);
-            line-height: 0.96;
-          }
-
-          .principle p {
-            margin: 18px 0 0;
-            font-size: 14px;
-            line-height: 1.58;
-          }
-
-          .note {
-            margin: 44px 0 0;
-            padding-top: 18px;
-            border-top: 2px solid var(--cream);
-            font-size: 10px;
-            font-weight: 850;
-            letter-spacing: 0.08em;
-            line-height: 1.5;
+            font-size: 20px;
+            line-height: 1.05;
             text-transform: uppercase;
           }
 
-          @media (max-width: 980px) {
-            .heading { grid-template-columns: 1fr; gap: 18px; }
+          .proof > span:last-child {
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.5;
           }
 
-          @media (max-width: 760px) {
-            .principles { padding: 56px 20px; }
-            .heading { margin-bottom: 34px; }
-            h2 { font-size: clamp(48px, 14vw, 68px); }
-            .grid { grid-template-columns: 1fr; }
-            .principle { min-height: 260px; padding: 22px; box-shadow: 5px 5px 0 var(--cream); }
-            .note { margin-top: 36px; font-size: 8px; }
+          @media (max-width: 980px) {
+            .proof-grid { grid-template-columns: 1fr 1fr; }
+            .proof:nth-child(2) { border-right: 0; }
+            .proof:nth-child(-n + 2) { border-bottom: 2px solid var(--brown); }
+          }
+
+          @media (max-width: 680px) {
+            .section { padding: 70px 20px; }
+            h2 { font-size: 49px; line-height: 1.02; }
+            .proof-grid { grid-template-columns: 1fr; }
+            .proof {
+              min-height: 150px;
+              border-right: 0;
+              border-bottom: 2px solid var(--brown);
+            }
+            .proof:nth-child(2) { border-right: 0; }
+            .proof:last-child { border-bottom: 0; }
           }
         </style>
 
-        <section class="principles" aria-labelledby="queso-story-principles-title">
-          <header class="heading">
-            <div>
-              <p class="eyebrow">${this.escape(eyebrow)}</p>
-              <h2 id="queso-story-principles-title">${this.escape(title)}</h2>
-            </div>
-            <p class="intro">${this.escape(copy)}</p>
+        <section class="section" aria-labelledby="queso-story-principles-title">
+          <header class="section-heading">
+            <p class="eyebrow">${this.escape(eyebrow)}</p>
+            <h2 id="queso-story-principles-title">${this.escape(title)}</h2>
           </header>
 
-          <div class="grid">${cards}</div>
-          <p class="note">${this.escape(note)}</p>
+          <div class="proof-grid">${cards}</div>
         </section>
       `;
     }
