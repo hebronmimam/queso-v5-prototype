@@ -1,0 +1,35 @@
+name: Fix Wix cart bridge handshake
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fix-cart-bridge-handshake.yml"
+      - "scripts/fix-cart-bridge-handshake.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-components:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Patch cart bridge behavior
+        run: python3 scripts/fix-cart-bridge-handshake.py
+
+      - name: Commit component updates
+        run: |
+          git config user.name "Hebronmimam"
+          git config user.email "mimam.hebron@gmail.com"
+          git add wix-components/dist/queso-site-header.js wix-components/dist/queso-menu-showcase.js
+          if git diff --cached --quiet; then
+            echo "No cart bridge changes were needed."
+            exit 0
+          fi
+          git commit -m "Fix Wix cart bridge iframe navigation"
+          git push
