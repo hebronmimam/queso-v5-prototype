@@ -168,7 +168,7 @@
             --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
-            height: 296px;
+            height: 100%;
             min-height: 0;
             overflow: visible;
             background: var(--cream);
@@ -422,11 +422,7 @@
           }
 
           @media (max-width: 1100px) {
-            :host:not([data-wix-frame]) {
-              height: 170px;
-            }
-
-            .desktop-cake-menu,
+.desktop-cake-menu,
             .desktop-nav {
               display: none;
             }

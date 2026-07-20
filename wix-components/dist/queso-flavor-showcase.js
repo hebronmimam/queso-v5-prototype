@@ -128,7 +128,7 @@
             --purple: #76509a;
             display: block;
             width: 100%;
-            height: 780px;
+            height: 100%;
             min-height: 0;
             overflow: hidden;
             background: var(--orange);

@@ -81,7 +81,7 @@
             --brown: #3d2416;
             display: block;
             width: 100%;
-            height: 430px;
+            height: 100%;
             min-height: 0;
             overflow: hidden;
             background: var(--yellow);

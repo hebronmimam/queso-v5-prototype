@@ -147,7 +147,7 @@
             --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
-            height: 930px;
+            height: 100%;
             min-height: 0;
             overflow: hidden;
             background: var(--brown);
