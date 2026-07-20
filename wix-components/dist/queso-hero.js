@@ -230,9 +230,9 @@
             --brown: #3d2416;
             --pink: #efa3b5;
             --pad: clamp(20px, 5vw, 76px);
+            position: relative;
             display: block;
             width: 100%;
-            height: 100%;
             min-height: 0;
             overflow: hidden;
             background: var(--brown);
@@ -261,9 +261,10 @@
           }
 
           .hero {
-            position: relative;
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            inset: 0;
+            width: auto;
+            height: auto;
             min-height: 0;
             overflow: hidden;
             background: var(--brown);

@@ -79,9 +79,9 @@
           :host {
             --yellow: #f4c24a;
             --brown: #3d2416;
+            position: relative;
             display: block;
             width: 100%;
-            height: 100%;
             min-height: 0;
             overflow: hidden;
             background: var(--yellow);
@@ -101,8 +101,10 @@
           }
 
           .intro {
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            inset: 0;
+            width: auto;
+            height: auto;
             min-height: 0;
             padding: clamp(38px, 8vh, 92px) clamp(20px, 5vw, 76px);
             display: flex;
