@@ -1,0 +1,35 @@
+name: Upgrade footer newsletter
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/upgrade-footer-newsletter.yml"
+      - "scripts/upgrade-footer-newsletter.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade-footer-newsletter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Upgrade footer newsletter bridge
+        run: python3 scripts/upgrade-footer-newsletter.py
+
+      - name: Commit upgraded footer
+        run: |
+          git config user.name "Hebronmimam"
+          git config user.email "mimam.hebron@gmail.com"
+          git add wix-components/dist/queso-site-footer.js
+          if git diff --cached --quiet; then
+            echo "No footer newsletter changes were needed."
+            exit 0
+          fi
+          git commit -m "Add real footer newsletter feedback states"
+          git push
