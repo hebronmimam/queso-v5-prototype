@@ -121,7 +121,9 @@
           `item-${index}-primary-label`,
           `item-${index}-primary-url`,
           `item-${index}-secondary-label`,
-          `item-${index}-secondary-url`
+          `item-${index}-secondary-url`,
+          `item-${index}-product-name`,
+          `item-${index}-product-id`
         );
       }
 
@@ -176,7 +178,9 @@
           primaryLabel: this.value(`item-${number}-primary-label`, fallback.primaryLabel),
           primaryUrl: this.value(`item-${number}-primary-url`, fallback.primaryUrl),
           secondaryLabel: this.value(`item-${number}-secondary-label`, fallback.secondaryLabel),
-          secondaryUrl: this.value(`item-${number}-secondary-url`, fallback.secondaryUrl)
+          secondaryUrl: this.value(`item-${number}-secondary-url`, fallback.secondaryUrl),
+          productName: this.value(`item-${number}-product-name`, fallback.productName),
+          productId: this.value(`item-${number}-product-id`, "")
         };
       });
     }
@@ -522,20 +526,25 @@
           const item = this.items[index];
           if (!item || !item.primaryLabel.toLowerCase().includes("add")) return;
 
-          this.dispatchEvent(new CustomEvent("queso-add-to-cart", {
+          const customEvent = new CustomEvent("queso-add-to-cart", {
             bubbles: true,
             composed: true,
             cancelable: true,
             detail: {
               index,
+              productId: item.productId,
               productName: item.productName,
               price: item.productPrice,
               image: item.image,
               fallbackUrl: item.primaryUrl
             }
-          }));
+          });
 
-          if (event.defaultPrevented) event.preventDefault();
+          this.dispatchEvent(customEvent);
+
+          if (customEvent.defaultPrevented) {
+            event.preventDefault();
+          }
         });
       });
     }
