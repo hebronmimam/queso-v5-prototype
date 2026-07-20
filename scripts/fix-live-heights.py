@@ -42,6 +42,10 @@ for filename in COMPONENTS:
 
     corrected = source[: match.start()] + corrected_host + source[match.end() :]
     corrected = DIRECT_FALLBACK.sub("\n", corrected)
+    corrected = corrected.replace(
+        "\n.desktop-cake-menu,\n",
+        "\n            .desktop-cake-menu,\n",
+    )
 
     verified_host = HOST_BLOCK.search(corrected)
     if not verified_host or not re.search(r"height:\s*100%;", verified_host.group(0)):
