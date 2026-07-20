@@ -29,6 +29,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Menu Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-menu-showcase.js`
 - Flavor Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-flavor-showcase.js`
 - Proof Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-proof-grid.js`
+- Events: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-events.js`
 
 ## Completed and confirmed
 
@@ -94,13 +95,12 @@ Confirmed starting Wix heights:
 - Tablet: `1450px`
 - Mobile: `1450px`
 
-## Current section
-
 ### 5. Proof Grid / “Small batch. Big care.”
 
 Tag: `queso-proof-grid`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype copy for Baked Fresh, Premium Ingredients, Halal and Extra Love.
 - Prototype CSS-built brand icons rather than generic text symbols.
 - Lovelo heading/card titles and Quicksand body/UI typography.
@@ -108,11 +108,32 @@ Implemented:
 - Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
 - Intentional editable attributes retained for the section heading and each card's title/copy.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `590px`
 - Tablet: `820px`
 - Mobile: `980px`
 
-## Next section after Proof Grid
+## Current section
 
-Events / “Upcoming popups.”: `queso-events`
+### 6. Events / “Upcoming popups.”
+
+Tag: `queso-events`
+
+Implemented:
+- Exact prototype split layout with event poster and orange event-information panel.
+- Lovelo heading/date typography and Quicksand supporting typography.
+- Prototype calendar structure: one month/venue card plus six colored date cards in a three-column desktop grid.
+- Mobile calendar changes to one month card and a two-column date grid.
+- Tatler and Foodie feature links styled as bordered publication cards.
+- Existing prototype poster is used until its AVIF replacement is added to the local repository workflow.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for poster, event details, schedule dates, CTA and publication links.
+
+Recommended starting Wix heights:
+- Desktop: `900px`
+- Tablet: `1600px`
+- Mobile: `1500px`
+
+## Next section after Events
+
+Reviews / “Love notes.”: `queso-reviews`
