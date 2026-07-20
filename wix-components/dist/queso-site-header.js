@@ -422,7 +422,7 @@
           }
 
           @media (max-width: 1100px) {
-.desktop-cake-menu,
+            .desktop-cake-menu,
             .desktop-nav {
               display: none;
             }
