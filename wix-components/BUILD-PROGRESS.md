@@ -15,7 +15,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 7. The Custom Element itself must have `min-height: 0`.
 8. Desktop fallback heights may exist for direct browser testing, but Wix-frame mode must use `height: auto` and let Wix determine the iframe height.
 9. Lovelo Black is used for the main bold display headings unless the prototype explicitly uses Queso Display.
-10. `queso font.ttf` is registered as Queso Display and is used for “we make them freshhhhh”.
+10. `queso font.ttf` is registered as Queso Display and is used for “we make them freshhhhh” and the Reviews eyebrow.
 11. Quicksand is the body/UI font.
 12. Mobile layouts must be copied from the prototype rather than improvised.
 13. Preserve working components when moving to the next section; do not make unrelated changes.
@@ -30,6 +30,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Flavor Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-flavor-showcase.js`
 - Proof Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-proof-grid.js`
 - Events: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-events.js`
+- Reviews: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-reviews.js`
 
 ## Completed and confirmed
 
@@ -113,13 +114,12 @@ Confirmed starting Wix heights:
 - Tablet: `820px`
 - Mobile: `980px`
 
-## Current section
-
 ### 6. Events / “Upcoming popups.”
 
 Tag: `queso-events`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype split layout with event poster and orange event-information panel.
 - Lovelo heading/date typography and Quicksand supporting typography.
 - Prototype calendar structure: one month/venue card plus six colored date cards in a three-column desktop grid.
@@ -129,11 +129,32 @@ Implemented:
 - Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
 - Intentional editable attributes retained for poster, event details, schedule dates, CTA and publication links.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `900px`
 - Tablet: `1600px`
 - Mobile: `1500px`
 
-## Next section after Events
+## Current section
 
-Reviews / “Love notes.”: `queso-reviews`
+### 7. Reviews / “Love notes.”
+
+Tag: `queso-reviews`
+
+Implemented:
+- Exact prototype press content and imagery for Tatler Asia and Foodie.
+- Queso Display is used for “The word on the street”; Lovelo is used for “Love notes.” and publication names.
+- Quicksand is used for review copy and links.
+- Exact prototype horizontal press-card proportions: 130px image column on desktop and 105px on mobile.
+- Continuous marquee with pause on hover/focus and a reduced-motion horizontal-scroll fallback.
+- Mobile preserves the prototype side-image card instead of incorrectly stacking the image above the text.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for heading content, animation settings and all press cards.
+
+Recommended starting Wix heights:
+- Desktop: `650px`
+- Tablet: `650px`
+- Mobile: `620px`
+
+## Next section after Reviews
+
+Social Grid / “From the feed.”: `queso-social-grid`
