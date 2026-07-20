@@ -5,16 +5,11 @@
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
-  const DEFAULT_IMAGE = new URL(
-    "site/assets/v4-originals/hero-canvas-wide.png",
-    REPO_ROOT
-  ).href;
+  const DEFAULT_IMAGE = new URL("assets/generated-campaign/06-occasion-party.png", REPO_ROOT).href;
   const IS_WIX_FRAME = window.self !== window.top;
 
   function installFonts() {
-    if (document.head.querySelector("style[data-queso-cakes-hero-fonts]")) {
-      return;
-    }
+    if (document.head.querySelector("style[data-queso-cakes-hero-fonts]")) return;
 
     const style = document.createElement("style");
     style.dataset.quesoCakesHeroFonts = "true";
@@ -45,9 +40,14 @@
         "eyebrow",
         "title",
         "copy",
-        "note",
+        "primary-label",
+        "primary-url",
+        "secondary-label",
+        "secondary-url",
+        "sticker",
         "image",
-        "image-alt"
+        "image-alt",
+        "image-position"
       ];
     }
 
@@ -82,32 +82,29 @@
     }
 
     render() {
-      const eyebrow = this.value("eyebrow", "Meet the Queso lineup");
-      const title = this.value("title", "The cakes.");
+      const eyebrow = this.value("eyebrow", "Cake types");
+      const title = this.value("title", "Pick your format.");
       const copy = this.value(
         "copy",
-        "Four different personalities. One very serious commitment to good cheesecake."
+        "Four clear ways to show up with cheesecake. Start here, or choose flavor first."
       );
-      const note = this.value(
-        "note",
-        "Birthday Suit • Artisan • Canvas • Flavor Drop"
-      );
+      const primaryLabel = this.value("primary-label", "Shop cake types");
+      const primaryUrl = this.value("primary-url", "#shop");
+      const secondaryLabel = this.value("secondary-label", "Shop by flavor");
+      const secondaryUrl = this.value("secondary-url", "/flavors");
+      const sticker = this.value("sticker", "Easy choice. Good cake.");
       const image = this.value("image", DEFAULT_IMAGE);
-      const imageAlt = this.value(
-        "image-alt",
-        "Colorful handcrafted Queso cheesecake"
-      );
+      const imageAlt = this.value("image-alt", "Queso cheesecakes for a celebration");
+      const imagePosition = this.value("image-position", "center");
 
       this.shadowRoot.innerHTML = `
         <style>
           :host {
             --orange: #ed6011;
             --cream: #fdf3e6;
-            --yellow: #f4c24a;
-            --brown: #3d2416;
             --pink: #efa3b5;
-            --pad: clamp(24px, 5vw, 76px);
-            position: relative;
+            --brown: #3d2416;
+            --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
             height: 100%;
@@ -118,218 +115,152 @@
             font-family: "Quicksand", Arial, sans-serif;
             font-weight: 550;
             font-synthesis: none;
-            text-rendering: geometricPrecision;
           }
 
-          :host([data-wix-frame]) {
-            height: auto;
-          }
+          :host([data-wix-frame]) { height: auto; }
+          *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; text-decoration: none; }
 
-          *, *::before, *::after {
-            box-sizing: border-box;
-          }
-
-          .hero {
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
-            width: auto;
-            height: auto;
+          .page-hero {
+            width: 100%;
+            height: 100%;
             min-height: 0;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
             overflow: hidden;
             background: var(--cream);
-            border-top: 2px solid var(--brown);
             border-bottom: 2px solid var(--brown);
           }
 
-          :host([data-wix-frame]) .hero {
+          :host([data-wix-frame]) .page-hero {
             position: fixed;
             inset: 0;
+            width: auto;
+            height: auto;
           }
 
-          .hero-copy {
-            position: relative;
-            z-index: 2;
+          .page-hero-copy {
             min-width: 0;
-            padding: var(--pad);
+            padding: clamp(65px, 8vw, 115px) var(--pad);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: var(--cream);
           }
 
           .eyebrow {
-            margin: 0 0 22px;
+            margin: 0 0 17px;
             color: #a84c09;
             font-size: 12px;
             font-weight: 850;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.13em;
             text-transform: uppercase;
           }
 
           h1 {
-            max-width: 720px;
             margin: 0;
             font-family: "Lovelo", Arial, sans-serif;
-            font-size: clamp(68px, 8vw, 128px);
+            font-size: clamp(65px, 7.6vw, 115px);
             font-weight: 900;
-            line-height: 0.91;
-            letter-spacing: -0.015em;
+            line-height: 1.02;
             text-transform: uppercase;
           }
 
           .lead {
-            max-width: 560px;
-            margin: 28px 0 0;
-            font-size: clamp(16px, 1.5vw, 20px);
-            line-height: 1.55;
+            max-width: 590px;
+            margin: 22px 0 0;
+            font-size: 18px;
+            line-height: 1.6;
           }
 
-          .lineup {
-            margin: 40px 0 0;
-            padding-top: 18px;
-            border-top: 2px solid var(--brown);
-            font-size: 10px;
+          .actions {
+            margin-top: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .button {
+            min-height: 50px;
+            padding: 0 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--brown);
+            border-radius: 10px;
+            background: #fff;
+            font-size: 11px;
             font-weight: 850;
-            letter-spacing: 0.09em;
-            line-height: 1.5;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
+            transition: transform 150ms ease;
           }
 
-          .hero-visual {
+          .button:hover,
+          .button:focus-visible { transform: translateY(-2px); }
+          .button:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+          .button--primary { background: var(--orange); color: #fff; }
+
+          .page-hero-media {
             position: relative;
             min-width: 0;
             min-height: 0;
             overflow: hidden;
-            background: var(--orange);
             border-left: 2px solid var(--brown);
           }
 
-          .hero-visual img {
-            position: absolute;
-            inset: 0;
-            display: block;
+          .page-hero-media img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
+            object-position: ${this.escape(imagePosition)};
           }
 
-          .hero-visual::after {
-            content: "";
+          .sticker {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(
-              180deg,
-              rgba(61, 36, 22, 0.02),
-              rgba(61, 36, 22, 0.18)
-            );
-          }
-
-          .badge {
-            position: absolute;
-            z-index: 2;
-            right: clamp(18px, 3vw, 46px);
-            top: clamp(18px, 3vw, 46px);
-            width: 126px;
-            aspect-ratio: 1;
-            padding: 16px;
-            display: grid;
-            place-items: center;
+            right: 5%;
+            bottom: 6%;
+            padding: 12px 20px;
             border: 2px solid var(--brown);
-            border-radius: 48% 52% 45% 55%;
+            border-radius: 999px;
             background: var(--pink);
-            font-family: "Lovelo", Arial, sans-serif;
-            font-size: 18px;
+            font-size: 10px;
             font-weight: 900;
-            line-height: 1.05;
-            text-align: center;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
-            transform: rotate(7deg);
+            transform: rotate(3deg);
           }
 
-          .corner-shape {
-            position: absolute;
-            z-index: 2;
-            left: -54px;
-            bottom: -58px;
-            width: 180px;
-            aspect-ratio: 1;
-            border: 2px solid var(--brown);
-            border-radius: 50%;
-            background: var(--yellow);
+          @media (max-width: 980px) {
+            .page-hero { grid-template-columns: 1fr; grid-template-rows: 1fr 480px; }
+            .page-hero-media { border-left: 0; border-top: 2px solid var(--brown); }
           }
 
-          @media (max-width: 760px) {
-            .hero {
-              grid-template-columns: 1fr;
-              grid-template-rows: minmax(0, 0.92fr) minmax(0, 1.08fr);
-            }
-
-            .hero-copy {
-              padding: 46px 20px 34px;
-            }
-
-            .eyebrow {
-              margin-bottom: 16px;
-              font-size: 10px;
-            }
-
-            h1 {
-              font-size: clamp(56px, 17vw, 76px);
-              line-height: 0.92;
-            }
-
-            .lead {
-              margin-top: 18px;
-              font-size: 15px;
-              line-height: 1.5;
-            }
-
-            .lineup {
-              margin-top: 25px;
-              padding-top: 14px;
-              font-size: 8px;
-            }
-
-            .hero-visual {
-              border-top: 2px solid var(--brown);
-              border-left: 0;
-            }
-
-            .badge {
-              width: 94px;
-              padding: 12px;
-              font-size: 13px;
-            }
-
-            .corner-shape {
-              width: 130px;
-            }
+          @media (max-width: 680px) {
+            .page-hero { grid-template-rows: auto 410px; }
+            .page-hero-copy { padding: 64px 20px; }
+            h1 { font-size: 61px; }
+            .lead { font-size: 16px; }
+            .actions { flex-direction: column; }
+            .button { width: 100%; }
           }
 
-          @media (max-width: 390px) {
-            h1 {
-              font-size: 52px;
-            }
-
-            .lead {
-              font-size: 14px;
-            }
+          @media (prefers-reduced-motion: reduce) {
+            .button { transition: none; }
           }
         </style>
 
-        <section class="hero" aria-labelledby="queso-cakes-title">
-          <div class="hero-copy">
+        <section class="page-hero" aria-labelledby="queso-cakes-title">
+          <div class="page-hero-copy">
             <p class="eyebrow">${this.escape(eyebrow)}</p>
             <h1 id="queso-cakes-title">${this.escape(title)}</h1>
             <p class="lead">${this.escape(copy)}</p>
-            <p class="lineup">${this.escape(note)}</p>
+            <div class="actions">
+              <a class="button button--primary" href="${this.escape(primaryUrl)}">${this.escape(primaryLabel)}</a>
+              <a class="button" href="${this.escape(secondaryUrl)}">${this.escape(secondaryLabel)}</a>
+            </div>
           </div>
 
-          <div class="hero-visual">
+          <div class="page-hero-media">
             <img
               src="${this.escape(image)}"
               alt="${this.escape(imageAlt)}"
@@ -337,8 +268,7 @@
               fetchpriority="high"
               decoding="async"
             >
-            <div class="badge" aria-hidden="true">Four<br>ways<br>to cake</div>
-            <div class="corner-shape" aria-hidden="true"></div>
+            <span class="sticker">${this.escape(sticker)}</span>
           </div>
         </section>
       `;
