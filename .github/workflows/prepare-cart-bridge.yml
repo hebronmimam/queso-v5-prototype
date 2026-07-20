@@ -1,0 +1,35 @@
+name: Prepare Wix cart bridge
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/prepare-cart-bridge.yml"
+      - "scripts/prepare-cart-bridge.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare-cart-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare menu Custom Element
+        run: python3 scripts/prepare-cart-bridge.py
+
+      - name: Commit prepared component
+        run: |
+          git config user.name "Hebronmimam"
+          git config user.email "mimam.hebron@gmail.com"
+          git add wix-components/dist/queso-menu-showcase.js
+          if git diff --cached --quiet; then
+            echo "No cart bridge component changes were needed."
+            exit 0
+          fi
+          git commit -m "Prepare menu Custom Element for Wix cart bridge"
+          git push
