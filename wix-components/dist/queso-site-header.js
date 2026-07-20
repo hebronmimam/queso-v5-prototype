@@ -62,6 +62,7 @@
         font-display: swap;
       }
     `;
+
     document.head.appendChild(style);
   }
 
@@ -69,6 +70,10 @@
     static get observedAttributes() {
       const attributes = [
         "announcement",
+        "announcement-1",
+        "announcement-2",
+        "announcement-3",
+        "announcement-4",
         "home-url",
         "cakes-label",
         "cakes-url",
@@ -81,7 +86,8 @@
         "cart-label",
         "cart-url",
         "cart-count",
-        "cart-bridge"
+        "cart-bridge",
+        "active-page"
       ];
 
       for (let index = 1; index <= 4; index += 1) {
@@ -101,6 +107,7 @@
       super();
       this.attachShadow({ mode: "open" });
       this.activeMenu = 0;
+      this.mobileMenuOpen = false;
     }
 
     connectedCallback() {
@@ -144,20 +151,68 @@
       });
     }
 
+    get announcements() {
+      return [
+        this.value("announcement-1", "Free pickup at Tsim Sha Tsui MTR"),
+        this.value("announcement-2", "This month's flavor drop"),
+        this.value("announcement-3", "Upcoming pop-ups"),
+        this.value("announcement-4", "Hong Kong • online only")
+      ];
+    }
+
+    get activePage() {
+      const explicit = this.value("active-page", "").toLowerCase();
+      if (explicit) return explicit;
+
+      let pathname = "";
+      try {
+        pathname = new URL(document.referrer || window.location.href).pathname.toLowerCase();
+      } catch {
+        pathname = "";
+      }
+
+      if (pathname.includes("flavor")) return "flavors";
+      if (pathname.includes("about") || pathname.includes("story")) return "story";
+      if (pathname.includes("connect") || pathname.includes("contact")) return "connect";
+      if (pathname.includes("cake") || pathname.includes("menu") || pathname.includes("product")) return "menu";
+      return "";
+    }
+
     render() {
-      const announcement = this.value(
-        "announcement",
-        "Free island-wide delivery on orders over HKD 600"
-      );
       const items = this.menuItems;
       const active = items[this.activeMenu] || items[0];
+      const activePage = this.activePage;
+      const menuLabel = this.value("cakes-label", "Menu");
+      const menuUrl = this.value("cakes-url", "/cakes");
+      const flavorsLabel = this.value("flavors-label", "Flavors");
+      const flavorsUrl = this.value("flavors-url", "/flavors");
+      const storyLabel = this.value("story-label", "Our story");
+      const storyUrl = this.value("story-url", "/about");
+      const connectLabel = this.value("connect-label", "Connect");
+      const connectUrl = this.value("connect-url", "/connect");
+      const cartLabel = this.value("cart-label", "Cart");
+      const cartCount = this.value("cart-count", "0");
+      const cartUrl = this.value("cart-url", "/cart");
+
+      const navLink = (page, url, label) => `
+        <a${activePage === page ? ' aria-current="page"' : ""} href="${this.escape(url)}">${this.escape(label)}</a>
+      `;
+
       const menuLinks = items.map((item, index) => `
-        <a class="cake-menu-link${index === this.activeMenu ? " is-active" : ""}" href="${this.escape(item.url)}" data-menu-index="${index}">${this.escape(item.title)}</a>
+        <a
+          class="cake-menu-link${index === this.activeMenu ? " is-active" : ""}"
+          href="${this.escape(item.url)}"
+          data-menu-index="${index}"
+        >${this.escape(item.title)}</a>
       `).join("");
-      const mobileLinks = items.map((item) => `
+
+      const categoryLinks = items.map((item) => `
         <a href="${this.escape(item.url)}">${this.escape(item.title)}</a>
       `).join("");
-      const marqueeRow = `${this.escape(announcement)} <b>✦</b> ${this.escape(announcement)} <b>✦</b> ${this.escape(announcement)} <b>✦</b>`;
+
+      const announcementRow = this.announcements
+        .map((item) => `<span>${this.escape(item)}</span><b>✦</b>`)
+        .join("");
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -180,32 +235,15 @@
             text-rendering: geometricPrecision;
           }
 
-          :host([data-wix-frame]) {
-            height: auto;
-          }
-
-          *, *::before, *::after {
-            box-sizing: border-box;
-          }
-
-          a {
-            color: inherit;
-            text-decoration: none;
-          }
-
-          button {
-            color: inherit;
-            font: inherit;
-          }
-
-          img {
-            display: block;
-            max-width: 100%;
-          }
+          :host([data-wix-frame]) { height: auto; }
+          *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; text-decoration: none; }
+          button { color: inherit; font: inherit; }
+          img { display: block; max-width: 100%; }
 
           .header {
             position: relative;
-            z-index: 10;
+            z-index: 20;
             width: 100%;
             height: 100%;
             min-height: 0;
@@ -238,9 +276,7 @@
             will-change: transform;
           }
 
-          .marquee:hover {
-            animation-play-state: paused;
-          }
+          .marquee:hover { animation-play-state: paused; }
 
           .marquee-row {
             display: flex;
@@ -248,23 +284,15 @@
             white-space: nowrap;
             font-size: 11px;
             font-weight: 800;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
           }
 
-          .marquee-row span {
-            padding: 0 20px;
-          }
-
-          .marquee-row b {
-            margin: 0 18px;
-            color: var(--yellow);
-            font-size: 17px;
-          }
+          .marquee-row span { padding: 0 20px; }
+          .marquee-row b { color: var(--yellow); font-size: 17px; }
 
           @keyframes header-marquee {
-            to {
-              transform: translateX(-50%);
-            }
+            to { transform: translateX(-50%); }
           }
 
           .nav {
@@ -298,7 +326,8 @@
           }
 
           .desktop-nav a:hover,
-          .desktop-nav a:focus-visible {
+          .desktop-nav a:focus-visible,
+          .desktop-nav a[aria-current="page"] {
             color: var(--orange);
             border-color: var(--orange);
           }
@@ -318,13 +347,6 @@
             text-transform: uppercase;
           }
 
-          .cart-link:focus-visible,
-          .menu-toggle:focus-visible,
-          a:focus-visible {
-            outline: 3px solid var(--yellow);
-            outline-offset: 3px;
-          }
-
           .menu-toggle {
             display: none;
             padding: 8px;
@@ -333,10 +355,19 @@
             cursor: pointer;
           }
 
+          .cart-link:focus-visible,
+          .menu-toggle:focus-visible,
+          a:focus-visible {
+            outline: 3px solid var(--yellow);
+            outline-offset: 3px;
+          }
+
+          .category-strip,
+          .mobile-menu { display: none; }
+
           .desktop-cake-menu {
             display: grid;
             grid-template-columns: minmax(370px, 0.78fr) 1.22fr;
-            min-height: 170px;
             background: var(--yellow);
             border-top: 2px solid var(--brown);
           }
@@ -348,7 +379,7 @@
           }
 
           .cake-menu-link {
-            min-height: 84px;
+            min-height: 64px;
             padding: 15px 24px;
             display: flex;
             align-items: center;
@@ -358,17 +389,11 @@
             border-bottom: 1px solid rgba(61, 36, 22, 0.35);
             font-family: "Lovelo", Arial, sans-serif;
             font-size: 14px;
-            font-weight: 900;
             text-transform: uppercase;
           }
 
-          .cake-menu-link:nth-child(2n) {
-            border-right: 0;
-          }
-
-          .cake-menu-link:nth-last-child(-n + 2) {
-            border-bottom: 0;
-          }
+          .cake-menu-link:nth-child(2n) { border-right: 0; }
+          .cake-menu-link:nth-last-child(-n + 2) { border-bottom: 0; }
 
           .cake-menu-link::after {
             content: "↗";
@@ -397,53 +422,41 @@
             border-right: 2px solid var(--brown);
           }
 
-          .cake-menu-preview__copy {
+          .cake-menu-preview-copy {
             padding: 22px;
             display: flex;
             flex-direction: column;
             justify-content: center;
           }
 
-          .cake-menu-preview__copy strong {
+          .cake-menu-preview-copy strong {
             font-family: "Lovelo", Arial, sans-serif;
             font-size: 24px;
-            font-weight: 900;
             text-transform: uppercase;
           }
 
-          .cake-menu-preview__copy p {
+          .cake-menu-preview-copy p {
             margin: 8px 0 0;
             font-size: 12px;
             line-height: 1.5;
           }
 
-          .mobile-category-strip,
-          .mobile-menu {
-            display: none;
-          }
-
           @media (max-width: 1100px) {
             .desktop-cake-menu,
-            .desktop-nav {
-              display: none;
-            }
+            .desktop-nav { display: none; }
 
-            .menu-toggle {
-              display: block;
-            }
+            .menu-toggle { display: block; }
 
-            .mobile-category-strip {
+            .category-strip {
               display: flex;
               overflow-x: auto;
               scrollbar-width: none;
               border-top: 1px solid rgba(61, 36, 22, 0.25);
             }
 
-            .mobile-category-strip::-webkit-scrollbar {
-              display: none;
-            }
+            .category-strip::-webkit-scrollbar { display: none; }
 
-            .mobile-category-strip a {
+            .category-strip a {
               flex: 0 0 auto;
               padding: 12px 17px;
               border-right: 1px solid rgba(61, 36, 22, 0.25);
@@ -461,9 +474,7 @@
               border-bottom: 2px solid var(--brown);
             }
 
-            .mobile-menu.is-open {
-              display: block;
-            }
+            .mobile-menu.is-open { display: block; }
 
             .mobile-menu a {
               display: block;
@@ -471,38 +482,26 @@
               border-bottom: 1px solid rgba(61, 36, 22, 0.25);
               font-family: "Lovelo", Arial, sans-serif;
               font-size: 22px;
-              font-weight: 900;
               text-transform: uppercase;
             }
           }
 
           @media (max-width: 580px) {
-            .nav {
-              padding: 0 20px;
-              gap: 18px;
-            }
-
-            .logo {
-              width: 122px;
-            }
-
-            .cart-link {
-              font-size: 10px;
-            }
+            .nav { padding: 0 20px; gap: 18px; }
+            .logo { width: 122px; }
+            .cart-link { font-size: 10px; }
           }
 
           @media (prefers-reduced-motion: reduce) {
-            .marquee {
-              animation: none;
-            }
+            .marquee { animation: none; }
           }
         </style>
 
         <header class="header">
-          <div class="announcement" aria-label="Site announcement">
+          <div class="announcement" aria-label="Site announcements">
             <div class="marquee">
-              <div class="marquee-row"><span>${marqueeRow}</span></div>
-              <div class="marquee-row" aria-hidden="true"><span>${marqueeRow}</span></div>
+              <div class="marquee-row">${announcementRow}</div>
+              <div class="marquee-row" aria-hidden="true">${announcementRow}</div>
             </div>
           </div>
 
@@ -510,26 +509,27 @@
             <a href="${this.escape(this.value("home-url", "/"))}" aria-label="Queso Bakehouse home">
               <img class="logo" src="${LOGO}" alt="Queso Bakehouse" loading="eager" decoding="async">
             </a>
+
             <nav class="desktop-nav" aria-label="Main navigation">
-              <a href="${this.escape(this.value("cakes-url", "/cakes"))}">${this.escape(this.value("cakes-label", "Cakes"))}</a>
-              <a href="${this.escape(this.value("flavors-url", "/flavors"))}">${this.escape(this.value("flavors-label", "Flavors"))}</a>
+              ${navLink("menu", menuUrl, menuLabel)}
+              ${navLink("flavors", flavorsUrl, flavorsLabel)}
+              ${navLink("story", storyUrl, storyLabel)}
+              ${navLink("connect", connectUrl, connectLabel)}
             </nav>
+
             <div class="nav-tools">
-              <nav class="desktop-nav" aria-label="Secondary navigation">
-                <a href="${this.escape(this.value("story-url", "/about"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
-                <a href="${this.escape(this.value("connect-url", "/connect"))}">${this.escape(this.value("connect-label", "Connect"))}</a>
-              </nav>
-              <a class="cart-link" href="${this.escape(this.value("cart-url", "/cart"))}" data-cart-link>${this.escape(this.value("cart-label", "Cart"))} ${this.escape(this.value("cart-count", "0"))}</a>
-              <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="queso-mobile-menu">Menu</button>
+              <a class="cart-link" href="${this.escape(cartUrl)}" data-cart-link>${this.escape(cartLabel)} (${this.escape(cartCount)})</a>
+              <button class="menu-toggle" type="button" aria-expanded="${String(this.mobileMenuOpen)}" aria-controls="queso-mobile-menu">Menu</button>
             </div>
           </div>
 
-          <nav class="mobile-category-strip" aria-label="Cake categories">${mobileLinks}</nav>
-          <nav class="mobile-menu" id="queso-mobile-menu" aria-label="Mobile navigation">
-            <a href="${this.escape(this.value("cakes-url", "/cakes"))}">${this.escape(this.value("cakes-label", "Cakes"))}</a>
-            <a href="${this.escape(this.value("flavors-url", "/flavors"))}">${this.escape(this.value("flavors-label", "Flavors"))}</a>
-            <a href="${this.escape(this.value("story-url", "/about"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
-            <a href="${this.escape(this.value("connect-url", "/connect"))}">${this.escape(this.value("connect-label", "Connect"))}</a>
+          <div class="category-strip" aria-label="Cake categories">${categoryLinks}</div>
+
+          <nav class="mobile-menu${this.mobileMenuOpen ? " is-open" : ""}" id="queso-mobile-menu" aria-label="Mobile navigation">
+            ${navLink("menu", menuUrl, menuLabel)}
+            ${navLink("flavors", flavorsUrl, flavorsLabel)}
+            ${navLink("story", storyUrl, storyLabel)}
+            ${navLink("connect", connectUrl, connectLabel)}
           </nav>
 
           <div class="desktop-cake-menu" aria-label="Preview cake types">
@@ -537,7 +537,7 @@
             <div class="cake-menu-preview">
               <img src="${this.escape(active.image)}" alt="${this.escape(active.title)} cheesecake" loading="eager" decoding="async">
               <img src="${this.escape(active.detail)}" alt="${this.escape(active.title)} cheesecake detail" loading="eager" decoding="async">
-              <div class="cake-menu-preview__copy">
+              <div class="cake-menu-preview-copy">
                 <strong>${this.escape(active.title)}</strong>
                 <p>${this.escape(active.copy)}</p>
               </div>
@@ -562,23 +562,19 @@
       });
 
       const toggle = this.shadowRoot.querySelector(".menu-toggle");
-      const menu = this.shadowRoot.querySelector(".mobile-menu");
-
       toggle?.addEventListener("click", () => {
-        const open = menu?.classList.toggle("is-open") || false;
-        toggle.setAttribute("aria-expanded", String(open));
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+        this.render();
+        this.bindEvents();
       });
 
       const cartLink = this.shadowRoot.querySelector("[data-cart-link]");
-
       cartLink?.addEventListener("click", (clickEvent) => {
         const bridgeEnabled = ["true", "1", "on", "yes"].includes(
           (this.getAttribute("cart-bridge") || "").toLowerCase()
         );
 
-        if (bridgeEnabled) {
-          clickEvent.preventDefault();
-        }
+        if (bridgeEnabled) clickEvent.preventDefault();
 
         const customEvent = new CustomEvent("queso-cart-open", {
           bubbles: true,
@@ -588,10 +584,7 @@
         });
 
         this.dispatchEvent(customEvent);
-
-        if (customEvent.defaultPrevented) {
-          clickEvent.preventDefault();
-        }
+        if (customEvent.defaultPrevented) clickEvent.preventDefault();
       });
     }
   }
