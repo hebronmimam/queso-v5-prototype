@@ -47,11 +47,11 @@
     }
   ];
 
-  function installQuesoFonts() {
-    if (document.head.querySelector("style[data-queso-fonts]")) return;
+  function installFonts() {
+    if (document.head.querySelector("style[data-queso-hero-fonts]")) return;
 
     const style = document.createElement("style");
-    style.dataset.quesoFonts = "true";
+    style.dataset.quesoHeroFonts = "true";
     style.textContent = `
       @font-face {
         font-family: "Lovelo";
@@ -107,14 +107,11 @@
       this.activeSlide = 0;
       this.timer = null;
       this.touchStartX = 0;
-      this.handleResize = this.syncFrameHeight.bind(this);
     }
 
     connectedCallback() {
-      installQuesoFonts();
+      installFonts();
       this.toggleAttribute("data-wix-frame", IS_WIX_FRAME);
-      this.syncFrameHeight();
-      window.addEventListener("resize", this.handleResize);
       this.activeSlide = this.initialSlide;
       this.render();
       this.bindEvents();
@@ -122,7 +119,6 @@
     }
 
     disconnectedCallback() {
-      window.removeEventListener("resize", this.handleResize);
       this.stopAutoplay();
     }
 
@@ -133,15 +129,6 @@
       this.render();
       this.bindEvents();
       this.startAutoplay();
-    }
-
-    syncFrameHeight() {
-      if (!IS_WIX_FRAME) {
-        this.style.removeProperty("--queso-frame-height");
-        return;
-      }
-
-      this.style.setProperty("--queso-frame-height", `${Math.max(window.innerHeight, 1)}px`);
     }
 
     value(name, fallback = "") {
@@ -245,7 +232,7 @@
             --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
-            height: 100%;
+            height: 700px;
             min-height: 0;
             overflow: hidden;
             background: var(--brown);
@@ -257,7 +244,7 @@
           }
 
           :host([data-wix-frame]) {
-            height: var(--queso-frame-height, 100vh);
+            height: auto;
           }
 
           *, *::before, *::after {
@@ -282,6 +269,13 @@
             background: var(--brown);
             border-bottom: 2px solid var(--brown);
             isolation: isolate;
+          }
+
+          :host([data-wix-frame]) .hero {
+            position: fixed;
+            inset: 0;
+            width: auto;
+            height: auto;
           }
 
           .hero-slide {
@@ -482,6 +476,42 @@
             .hero-controls {
               right: 20px;
               bottom: 25px;
+            }
+          }
+
+          @media (max-width: 680px) and (max-height: 590px) {
+            .hero-copy {
+              top: 47%;
+            }
+
+            .eyebrow {
+              margin-bottom: 10px;
+              font-size: 10px;
+            }
+
+            .display {
+              font-size: clamp(42px, 13vw, 50px);
+            }
+
+            .lead {
+              max-width: 310px;
+              margin: 13px 0;
+              font-size: 13px;
+              line-height: 1.45;
+            }
+
+            .button {
+              min-height: 43px;
+              padding-inline: 17px;
+              font-size: 9px;
+            }
+
+            .hero-sticker {
+              display: none;
+            }
+
+            .hero-controls {
+              bottom: 16px;
             }
           }
 
