@@ -515,7 +515,7 @@
             </nav>
             <div class="nav-tools">
               <nav class="desktop-nav" aria-label="Secondary navigation">
-                <a href="${this.escape(this.value("story-url", "/our-story"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
+                <a href="${this.escape(this.value("story-url", "/about"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
                 <a href="${this.escape(this.value("connect-url", "/connect"))}">${this.escape(this.value("connect-label", "Connect"))}</a>
               </nav>
               <a class="cart-link" href="${this.escape(this.value("cart-url", "/cart"))}" data-cart-link>${this.escape(this.value("cart-label", "Cart"))} ${this.escape(this.value("cart-count", "0"))}</a>
@@ -527,7 +527,7 @@
           <nav class="mobile-menu" id="queso-mobile-menu" aria-label="Mobile navigation">
             <a href="${this.escape(this.value("cakes-url", "/cakes"))}">${this.escape(this.value("cakes-label", "Cakes"))}</a>
             <a href="${this.escape(this.value("flavors-url", "/flavors"))}">${this.escape(this.value("flavors-label", "Flavors"))}</a>
-            <a href="${this.escape(this.value("story-url", "/our-story"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
+            <a href="${this.escape(this.value("story-url", "/about"))}">${this.escape(this.value("story-label", "Our Story"))}</a>
             <a href="${this.escape(this.value("connect-url", "/connect"))}">${this.escape(this.value("connect-label", "Connect"))}</a>
           </nav>
 

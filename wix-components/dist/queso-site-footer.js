@@ -20,7 +20,7 @@
     {
       title: "About",
       links: [
-        ["Our story", "/our-story"],
+        ["Our story", "/about"],
         ["Popups", "/#popups"],
         ["Connect", "/connect"]
       ]
