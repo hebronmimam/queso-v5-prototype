@@ -3,20 +3,20 @@
 
   const SCRIPT_URL = document.currentScript?.src || "";
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
-  const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
+  const FONT_QUESO = new URL("queso font.ttf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
   const IS_WIX_FRAME = window.self !== window.top;
 
-  function installQuesoFonts() {
-    if (document.head.querySelector("style[data-queso-fonts]")) return;
+  function installFonts() {
+    if (document.head.querySelector("style[data-queso-intro-fonts]")) return;
 
     const style = document.createElement("style");
-    style.dataset.quesoFonts = "true";
+    style.dataset.quesoIntroFonts = "true";
     style.textContent = `
       @font-face {
-        font-family: "Lovelo";
-        src: url("${FONT_LOVELO}") format("opentype");
-        font-weight: 900;
+        font-family: "Queso Display";
+        src: url("${FONT_QUESO}") format("truetype");
+        font-weight: 400;
         font-style: normal;
         font-display: swap;
       }
@@ -40,32 +40,16 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.handleResize = this.syncFrameHeight.bind(this);
     }
 
     connectedCallback() {
-      installQuesoFonts();
+      installFonts();
       this.toggleAttribute("data-wix-frame", IS_WIX_FRAME);
-      this.syncFrameHeight();
-      window.addEventListener("resize", this.handleResize);
       this.render();
-    }
-
-    disconnectedCallback() {
-      window.removeEventListener("resize", this.handleResize);
     }
 
     attributeChangedCallback() {
       if (this.isConnected) this.render();
-    }
-
-    syncFrameHeight() {
-      if (!IS_WIX_FRAME) {
-        this.style.removeProperty("--queso-frame-height");
-        return;
-      }
-
-      this.style.setProperty("--queso-frame-height", `${Math.max(window.innerHeight, 1)}px`);
     }
 
     value(name, fallback) {
@@ -97,7 +81,7 @@
             --brown: #3d2416;
             display: block;
             width: 100%;
-            height: 100%;
+            height: 430px;
             min-height: 0;
             overflow: hidden;
             background: var(--yellow);
@@ -109,7 +93,7 @@
           }
 
           :host([data-wix-frame]) {
-            height: var(--queso-frame-height, 100vh);
+            height: auto;
           }
 
           *, *::before, *::after {
@@ -120,7 +104,7 @@
             width: 100%;
             height: 100%;
             min-height: 0;
-            padding: clamp(76px, 9vw, 130px) clamp(20px, 5vw, 76px);
+            padding: clamp(38px, 8vh, 92px) clamp(20px, 5vw, 76px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -129,6 +113,13 @@
             overflow: hidden;
             background: var(--yellow);
             border-bottom: 2px solid var(--brown);
+          }
+
+          :host([data-wix-frame]) .intro {
+            position: fixed;
+            inset: 0;
+            width: auto;
+            height: auto;
           }
 
           .eyebrow {
@@ -143,12 +134,12 @@
           h2 {
             max-width: 1150px;
             margin: 0;
-            font-family: "Lovelo", Arial, sans-serif;
+            font-family: "Queso Display", sans-serif;
             font-size: clamp(54px, 7vw, 104px);
-            font-weight: 900;
-            line-height: 1.04;
+            font-weight: 400;
+            line-height: 1.02;
             letter-spacing: 0;
-            text-transform: uppercase;
+            text-transform: none;
           }
 
           .copy {
@@ -160,24 +151,47 @@
 
           @media (max-width: 680px) {
             .intro {
-              padding: 70px 20px;
+              padding: clamp(30px, 7vh, 58px) 20px;
             }
 
             h2 {
-              font-size: 58px;
-              line-height: 1.04;
+              max-width: 330px;
+              font-size: clamp(43px, 14.5vw, 58px);
+              line-height: 1.02;
             }
 
             .copy {
-              margin-top: 26px;
-              font-size: 16px;
-              line-height: 1.6;
+              max-width: 320px;
+              margin-top: 22px;
+              font-size: 15px;
+              line-height: 1.55;
             }
           }
 
           @media (max-width: 360px) {
             h2 {
-              font-size: 52px;
+              font-size: 47px;
+            }
+          }
+
+          @media (max-height: 390px) {
+            .intro {
+              padding-block: 22px;
+            }
+
+            .eyebrow {
+              margin-bottom: 10px;
+              font-size: 10px;
+            }
+
+            h2 {
+              font-size: clamp(38px, 12vw, 54px);
+            }
+
+            .copy {
+              margin-top: 14px;
+              font-size: 13px;
+              line-height: 1.45;
             }
           }
         </style>
