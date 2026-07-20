@@ -32,6 +32,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Events: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-events.js`
 - Reviews: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-reviews.js`
 - Social Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-social-grid.js`
+- Site Footer: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-site-footer.js`
 
 ## Completed and confirmed
 
@@ -155,13 +156,12 @@ Confirmed starting Wix heights:
 - Tablet: `650px`
 - Mobile: `620px`
 
-## Current section
-
 ### 8. Social Grid / “From the feed.”
 
 Tag: `queso-social-grid`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype Instagram heading, CTA and four-image content.
 - Queso Display is used for “From the feed.”; Quicksand is used for the eyebrow and CTA.
 - Four-column desktop grid and two-column tablet/mobile grid, matching the prototype.
@@ -170,11 +170,33 @@ Implemented:
 - Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
 - Intentional editable attributes retained for heading content, Instagram CTA and all four images/URLs.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `760px`
 - Tablet: `1100px`
 - Mobile: `650px`
 
-## Next section after Social Grid
+## Current section
 
-Site Footer: `queso-site-footer`
+### 9. Site Footer
+
+Tag: `queso-site-footer`
+
+Implemented:
+- Exact prototype yellow marquee, orange final CTA, newsletter signup, dark navigation area and legal/location row.
+- Lovelo is used for display headings, marquee text, doodle and footer navigation headings.
+- Quicksand is used for supporting copy, navigation links, form fields and UI text.
+- Desktop uses the full five-column footer navigation layout.
+- Tablet/mobile hide the decorative doodle, stack the signup form and reorganize navigation responsively.
+- Mobile keeps two navigation columns, changing to one column only below 390px.
+- `queso-newsletter-submit` Custom Event is retained for the later Wix/Velo newsletter bridge.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for marquee, CTA, newsletter copy and bottom legal/location text.
+
+Recommended starting Wix heights:
+- Desktop: `930px`
+- Tablet: `1150px`
+- Mobile: `1250px`
+
+## Next after Site Footer
+
+Site Header verification and homepage integration pass: links, cart event bridge, newsletter event bridge, final responsive spacing and publish testing.
