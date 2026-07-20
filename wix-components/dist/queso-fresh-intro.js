@@ -6,6 +6,7 @@
   const FONT_ACCENT = new URL("queso font.ttf", REPO_ROOT).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
+  const IS_WIX_FRAME = window.self !== window.top;
 
   function installQuesoFonts() {
     if (document.head.querySelector("style[data-queso-fonts]")) return;
@@ -48,15 +49,32 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
+      this.handleResize = this.syncFrameHeight.bind(this);
     }
 
     connectedCallback() {
       installQuesoFonts();
+      this.toggleAttribute("data-wix-frame", IS_WIX_FRAME);
+      this.syncFrameHeight();
+      window.addEventListener("resize", this.handleResize);
       this.render();
+    }
+
+    disconnectedCallback() {
+      window.removeEventListener("resize", this.handleResize);
     }
 
     attributeChangedCallback() {
       if (this.isConnected) this.render();
+    }
+
+    syncFrameHeight() {
+      if (!IS_WIX_FRAME) {
+        this.style.removeProperty("--queso-frame-height");
+        return;
+      }
+
+      this.style.setProperty("--queso-frame-height", `${Math.max(window.innerHeight, 1)}px`);
     }
 
     value(name, fallback) {
@@ -97,6 +115,10 @@
             font-weight: 550;
             font-synthesis: none;
             text-rendering: geometricPrecision;
+          }
+
+          :host([data-wix-frame]) {
+            height: var(--queso-frame-height, 100vh);
           }
 
           *, *::before, *::after {
