@@ -3,9 +3,42 @@
 
   const SCRIPT_URL = document.currentScript?.src || "";
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
+  const FONT_ACCENT = new URL("queso font.ttf", REPO_ROOT).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
-  const IS_WIX_FRAME = window.self !== window.top;
+
+  function installQuesoFonts() {
+    if (document.head.querySelector("style[data-queso-fonts]")) return;
+
+    const style = document.createElement("style");
+    style.dataset.quesoFonts = "true";
+    style.textContent = `
+      @font-face {
+        font-family: "QuesoAccent";
+        src: url("${FONT_ACCENT}") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Lovelo";
+        src: url("${FONT_LOVELO}") format("opentype");
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Quicksand";
+        src: url("${FONT_QUICKSAND}") format("truetype");
+        font-weight: 300 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   class QuesoFreshIntro extends HTMLElement {
     static get observedAttributes() {
@@ -15,53 +48,15 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.handleFrameResize = this.syncFrameHeight.bind(this);
     }
 
     connectedCallback() {
-      this.toggleAttribute("data-wix-frame", IS_WIX_FRAME);
-      this.syncFrameHeight();
-      window.addEventListener("resize", this.handleFrameResize);
-      this.preloadFonts();
+      installQuesoFonts();
       this.render();
-    }
-
-    disconnectedCallback() {
-      window.removeEventListener("resize", this.handleFrameResize);
     }
 
     attributeChangedCallback() {
       if (this.isConnected) this.render();
-    }
-
-    syncFrameHeight() {
-      if (!IS_WIX_FRAME) {
-        this.style.removeProperty("--queso-frame-height");
-        return;
-      }
-
-      this.style.setProperty(
-        "--queso-frame-height",
-        `${Math.max(window.innerHeight, 1)}px`
-      );
-    }
-
-    preloadFonts() {
-      [
-        [FONT_LOVELO, "font/otf"],
-        [FONT_QUICKSAND, "font/ttf"]
-      ].forEach(([href, type]) => {
-        if (document.head.querySelector(`link[data-queso-font="${href}"]`)) return;
-
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "font";
-        link.type = type;
-        link.href = href;
-        link.crossOrigin = "anonymous";
-        link.dataset.quesoFont = href;
-        document.head.appendChild(link);
-      });
     }
 
     value(name, fallback) {
@@ -88,29 +83,13 @@
 
       this.shadowRoot.innerHTML = `
         <style>
-          @font-face {
-            font-family: "Lovelo";
-            src: url("${FONT_LOVELO}") format("opentype");
-            font-weight: 900;
-            font-style: normal;
-            font-display: swap;
-          }
-
-          @font-face {
-            font-family: "Quicksand";
-            src: url("${FONT_QUICKSAND}") format("truetype");
-            font-weight: 300 700;
-            font-style: normal;
-            font-display: swap;
-          }
-
           :host {
             --yellow: #f4c24a;
             --brown: #3d2416;
             display: block;
             width: 100%;
-            height: var(--queso-frame-height, 100%);
-            min-height: 390px;
+            height: 100%;
+            min-height: 0;
             overflow: hidden;
             background: var(--yellow);
             color: var(--brown);
@@ -118,10 +97,6 @@
             font-weight: 550;
             font-synthesis: none;
             text-rendering: geometricPrecision;
-          }
-
-          :host([data-wix-frame]) {
-            min-height: 0;
           }
 
           *, *::before, *::after {
@@ -132,7 +107,7 @@
             width: 100%;
             height: 100%;
             min-height: 0;
-            padding: clamp(42px, 9vh, 92px) clamp(20px, 5vw, 76px);
+            padding: clamp(32px, 9vh, 92px) clamp(20px, 5vw, 76px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -155,12 +130,12 @@
           h2 {
             max-width: 1150px;
             margin: 0;
-            font-family: "Lovelo", Arial, sans-serif;
+            font-family: "QuesoAccent", "Lovelo", Arial, sans-serif;
             font-size: clamp(54px, 7vw, 104px);
-            font-weight: 900;
-            line-height: 1.04;
+            font-weight: 400;
+            line-height: 1.08;
             letter-spacing: 0;
-            text-transform: uppercase;
+            text-transform: none;
           }
 
           .copy {
@@ -171,25 +146,38 @@
           }
 
           @media (max-width: 680px) {
-            :host {
-              min-height: 360px;
-            }
-
-            :host([data-wix-frame]) {
-              min-height: 0;
-            }
-
             .intro {
-              padding: 48px 20px;
+              padding: 38px 20px;
             }
 
             h2 {
-              font-size: clamp(42px, 13vw, 60px);
+              font-size: clamp(46px, 15vw, 58px);
             }
 
             .copy {
               margin-top: 20px;
-              font-size: 16px;
+              font-size: 15px;
+            }
+          }
+
+          @media (max-height: 350px) {
+            .intro {
+              padding-block: 20px;
+            }
+
+            .eyebrow {
+              margin-bottom: 10px;
+              font-size: 10px;
+            }
+
+            h2 {
+              font-size: clamp(38px, 7vw, 72px);
+            }
+
+            .copy {
+              margin-top: 12px;
+              font-size: 13px;
+              line-height: 1.45;
             }
           }
         </style>
