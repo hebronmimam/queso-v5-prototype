@@ -5,16 +5,11 @@
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
-  const DEFAULT_IMAGE = new URL(
-    "site/assets/current-site/lotus-biscoff-main.png",
-    REPO_ROOT
-  ).href;
+  const DEFAULT_IMAGE = new URL("site/assets/v3-originals/flavor-five-overhead.png", REPO_ROOT).href;
   const IS_WIX_FRAME = window.self !== window.top;
 
   function installFonts() {
-    if (document.head.querySelector("style[data-queso-flavors-hero-fonts]")) {
-      return;
-    }
+    if (document.head.querySelector("style[data-queso-flavors-hero-fonts]")) return;
 
     const style = document.createElement("style");
     style.dataset.quesoFlavorsHeroFonts = "true";
@@ -45,7 +40,9 @@
         "eyebrow",
         "title",
         "copy",
-        "note",
+        "button-label",
+        "button-url",
+        "sticker",
         "image",
         "image-alt",
         "image-position"
@@ -83,21 +80,17 @@
     }
 
     render() {
-      const eyebrow = this.value("eyebrow", "The Queso flavor line-up");
-      const title = this.value("title", "Pick your flavor.");
+      const eyebrow = this.value("eyebrow", "Shop by flavor");
+      const title = this.value("title", "Flavor first. Format next.");
       const copy = this.value(
         "copy",
-        "Classic, chocolate, lemon, caramel, ube and a monthly drop that refuses to stay put."
+        "Classic, chocolate, lemon, caramel and ube are available across Birthday Suit, Artisan and Canvas."
       );
-      const note = this.value(
-        "note",
-        "Choose the flavor first. Then choose the cake format that fits the moment."
-      );
+      const buttonLabel = this.value("button-label", "Start with a flavor");
+      const buttonUrl = this.value("button-url", "#choose-format");
+      const sticker = this.value("sticker", "Pick your mood");
       const image = this.value("image", DEFAULT_IMAGE);
-      const imageAlt = this.value(
-        "image-alt",
-        "Queso Bakehouse monthly flavor cheesecake"
-      );
+      const imageAlt = this.value("image-alt", "Five Queso cheesecake flavors");
       const imagePosition = this.value("image-position", "center");
 
       this.shadowRoot.innerHTML = `
@@ -108,274 +101,159 @@
             --yellow: #f4c24a;
             --brown: #3d2416;
             --pink: #efa3b5;
-            --purple: #76509a;
-            --pad: clamp(24px, 5vw, 76px);
-
+            --pad: clamp(20px, 5vw, 76px);
             display: block;
             width: 100%;
             height: 100%;
             min-height: 0;
             overflow: hidden;
-            background: var(--orange);
-            color: var(--cream);
+            background: var(--cream);
+            color: var(--brown);
             font-family: "Quicksand", Arial, sans-serif;
             font-weight: 550;
             font-synthesis: none;
-            text-rendering: geometricPrecision;
           }
 
-          :host([data-wix-frame]) {
-            height: auto;
-          }
+          :host([data-wix-frame]) { height: auto; }
+          *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; text-decoration: none; }
 
-          *,
-          *::before,
-          *::after {
-            box-sizing: border-box;
-          }
-
-          .hero {
+          .page-hero {
             width: 100%;
             height: 100%;
             min-height: 0;
             display: grid;
-            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
             overflow: hidden;
-            background: var(--orange);
-            border-top: 2px solid var(--brown);
+            background: var(--cream);
             border-bottom: 2px solid var(--brown);
           }
 
-          :host([data-wix-frame]) .hero {
+          :host([data-wix-frame]) .page-hero {
             position: fixed;
             inset: 0;
             width: auto;
             height: auto;
           }
 
-          .copy-panel {
-            position: relative;
+          .page-hero-copy {
             min-width: 0;
-            padding: var(--pad);
+            padding: clamp(65px, 8vw, 115px) var(--pad);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            overflow: hidden;
           }
 
           .eyebrow {
-            margin: 0 0 20px;
-            color: var(--yellow);
+            margin: 0 0 17px;
+            color: #a84c09;
             font-size: 12px;
             font-weight: 850;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.13em;
             text-transform: uppercase;
           }
 
           h1 {
-            max-width: 780px;
             margin: 0;
             font-family: "Lovelo", Arial, sans-serif;
-            font-size: clamp(70px, 8vw, 132px);
+            font-size: clamp(65px, 7.6vw, 115px);
             font-weight: 900;
-            line-height: 0.9;
-            letter-spacing: -0.015em;
+            line-height: 1.02;
             text-transform: uppercase;
           }
 
           .lead {
-            max-width: 570px;
-            margin: 28px 0 0;
-            font-size: clamp(16px, 1.45vw, 20px);
-            line-height: 1.58;
+            max-width: 590px;
+            margin: 22px 0 0;
+            font-size: 18px;
+            line-height: 1.6;
           }
 
-          .note {
-            max-width: 560px;
-            margin-top: 38px;
-            padding-top: 18px;
-            border-top: 2px solid currentColor;
-            font-size: 10px;
-            font-weight: 850;
-            letter-spacing: 0.08em;
-            line-height: 1.55;
-            text-transform: uppercase;
-          }
-
-          .chips {
-            position: absolute;
-            left: var(--pad);
-            bottom: clamp(20px, 3vw, 40px);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 9px;
-          }
-
-          .chip {
-            min-width: 62px;
-            padding: 8px 12px;
+          .button {
+            align-self: flex-start;
+            min-height: 50px;
+            margin-top: 26px;
+            padding: 0 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 2px solid var(--brown);
-            border-radius: 999px;
-            background: var(--cream);
-            color: var(--brown);
-            font-size: 8px;
-            font-weight: 900;
-            letter-spacing: 0.08em;
-            text-align: center;
+            border-radius: 10px;
+            background: var(--orange);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
+            transition: transform 150ms ease;
           }
 
-          .chip:nth-child(2) { background: var(--pink); }
-          .chip:nth-child(3) { background: var(--yellow); }
-          .chip:nth-child(4) { background: #ff7a26; }
-          .chip:nth-child(5) { background: #b99ad2; }
+          .button:hover,
+          .button:focus-visible { transform: translateY(-2px); }
 
-          .media {
+          .button:focus-visible {
+            outline: 3px solid var(--yellow);
+            outline-offset: 3px;
+          }
+
+          .page-hero-media {
             position: relative;
             min-width: 0;
             min-height: 0;
             overflow: hidden;
-            background: var(--yellow);
             border-left: 2px solid var(--brown);
           }
 
-          .media img {
-            position: absolute;
-            inset: 0;
-            display: block;
+          .page-hero-media img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: ${this.escape(imagePosition)};
           }
 
-          .media::after {
-            content: "";
+          .sticker {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(
-              180deg,
-              rgba(61, 36, 22, 0.03),
-              rgba(61, 36, 22, 0.25)
-            );
-          }
-
-          .drop-card {
-            position: absolute;
-            z-index: 2;
-            right: clamp(18px, 3vw, 42px);
-            top: clamp(18px, 3vw, 42px);
-            width: min(220px, 46%);
-            padding: 20px;
+            right: 5%;
+            bottom: 6%;
+            padding: 12px 20px;
             border: 2px solid var(--brown);
-            border-radius: 18px 8px 22px 10px;
-            background: var(--cream);
-            color: var(--brown);
-            box-shadow: 7px 7px 0 var(--brown);
-            transform: rotate(2deg);
-          }
-
-          .drop-card small {
-            display: block;
-            margin-bottom: 8px;
-            color: #a84c09;
-            font-size: 8px;
+            border-radius: 999px;
+            background: var(--pink);
+            font-size: 10px;
             font-weight: 900;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
+            transform: rotate(3deg);
           }
 
-          .drop-card strong {
-            display: block;
-            font-family: "Lovelo", Arial, sans-serif;
-            font-size: clamp(20px, 2vw, 28px);
-            line-height: 1;
-            text-transform: uppercase;
-          }
-
-          @media (max-width: 820px) {
-            .hero {
+          @media (max-width: 980px) {
+            .page-hero {
               grid-template-columns: 1fr;
-              grid-template-rows: minmax(0, 0.96fr) minmax(0, 1.04fr);
+              grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
             }
 
-            .copy-panel {
-              padding: 48px 20px 78px;
-            }
-
-            .eyebrow {
-              margin-bottom: 15px;
-              font-size: 10px;
-            }
-
-            h1 {
-              font-size: clamp(58px, 16vw, 82px);
-              line-height: 0.91;
-            }
-
-            .lead {
-              margin-top: 20px;
-              font-size: 15px;
-              line-height: 1.52;
-            }
-
-            .note {
-              margin-top: 25px;
-              padding-top: 14px;
-              font-size: 8px;
-            }
-
-            .chips {
-              left: 20px;
-              bottom: 24px;
-            }
-
-            .media {
+            .page-hero-media {
               border-top: 2px solid var(--brown);
               border-left: 0;
             }
-
-            .drop-card {
-              width: 178px;
-              padding: 15px;
-              box-shadow: 5px 5px 0 var(--brown);
-            }
           }
 
-          @media (max-width: 390px) {
-            h1 {
-              font-size: 52px;
-            }
-
-            .lead {
-              font-size: 14px;
-            }
-
-            .chip {
-              min-width: 54px;
-              padding-inline: 9px;
-            }
+          @media (max-width: 680px) {
+            .page-hero-copy { padding: 64px 20px; }
+            h1 { font-size: 61px; }
+            .lead { font-size: 16px; }
           }
         </style>
 
-        <section class="hero" aria-labelledby="queso-flavors-hero-title">
-          <div class="copy-panel">
+        <section class="page-hero" aria-labelledby="queso-flavors-hero-title">
+          <div class="page-hero-copy">
             <p class="eyebrow">${this.escape(eyebrow)}</p>
             <h1 id="queso-flavors-hero-title">${this.escape(title)}</h1>
             <p class="lead">${this.escape(copy)}</p>
-            <p class="note">${this.escape(note)}</p>
-
-            <div class="chips" aria-hidden="true">
-              <span class="chip">Classic</span>
-              <span class="chip">Chocolate</span>
-              <span class="chip">Lemon</span>
-              <span class="chip">Caramel</span>
-              <span class="chip">Ube</span>
-            </div>
+            <a class="button" href="${this.escape(buttonUrl)}">${this.escape(buttonLabel)}</a>
           </div>
 
-          <div class="media">
+          <div class="page-hero-media">
             <img
               src="${this.escape(image)}"
               alt="${this.escape(imageAlt)}"
@@ -383,11 +261,7 @@
               fetchpriority="high"
               decoding="async"
             >
-
-            <div class="drop-card">
-              <small>Monthly drop</small>
-              <strong>Here for a good time.</strong>
-            </div>
+            <span class="sticker">${this.escape(sticker)}</span>
           </div>
         </section>
       `;
