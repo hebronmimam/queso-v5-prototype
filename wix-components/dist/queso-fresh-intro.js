@@ -3,7 +3,6 @@
 
   const SCRIPT_URL = document.currentScript?.src || "";
   const REPO_ROOT = new URL("../../", SCRIPT_URL).href;
-  const FONT_ACCENT = new URL("queso font.ttf", REPO_ROOT).href;
   const FONT_LOVELO = new URL("Lovelo_Black.otf", REPO_ROOT).href;
   const FONT_QUICKSAND = new URL("Quicksand-VariableFont_wght.ttf", REPO_ROOT).href;
   const IS_WIX_FRAME = window.self !== window.top;
@@ -14,14 +13,6 @@
     const style = document.createElement("style");
     style.dataset.quesoFonts = "true";
     style.textContent = `
-      @font-face {
-        font-family: "QuesoAccent";
-        src: url("${FONT_ACCENT}") format("truetype");
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
-
       @font-face {
         font-family: "Lovelo";
         src: url("${FONT_LOVELO}") format("opentype");
@@ -129,7 +120,7 @@
             width: 100%;
             height: 100%;
             min-height: 0;
-            padding: clamp(32px, 9vh, 92px) clamp(20px, 5vw, 76px);
+            padding: clamp(76px, 9vw, 130px) clamp(20px, 5vw, 76px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -152,12 +143,12 @@
           h2 {
             max-width: 1150px;
             margin: 0;
-            font-family: "QuesoAccent", "Lovelo", Arial, sans-serif;
+            font-family: "Lovelo", Arial, sans-serif;
             font-size: clamp(54px, 7vw, 104px);
-            font-weight: 400;
-            line-height: 1.08;
+            font-weight: 900;
+            line-height: 1.04;
             letter-spacing: 0;
-            text-transform: none;
+            text-transform: uppercase;
           }
 
           .copy {
@@ -169,37 +160,24 @@
 
           @media (max-width: 680px) {
             .intro {
-              padding: 38px 20px;
+              padding: 70px 20px;
             }
 
             h2 {
-              font-size: clamp(46px, 15vw, 58px);
+              font-size: 58px;
+              line-height: 1.04;
             }
 
             .copy {
-              margin-top: 20px;
-              font-size: 15px;
+              margin-top: 26px;
+              font-size: 16px;
+              line-height: 1.6;
             }
           }
 
-          @media (max-height: 350px) {
-            .intro {
-              padding-block: 20px;
-            }
-
-            .eyebrow {
-              margin-bottom: 10px;
-              font-size: 10px;
-            }
-
+          @media (max-width: 360px) {
             h2 {
-              font-size: clamp(38px, 7vw, 72px);
-            }
-
-            .copy {
-              margin-top: 12px;
-              font-size: 13px;
-              line-height: 1.45;
+              font-size: 52px;
             }
           }
         </style>
