@@ -15,7 +15,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 7. The Custom Element itself must have `min-height: 0`.
 8. Desktop fallback heights may exist for direct browser testing, but Wix-frame mode must use `height: auto` and let Wix determine the iframe height.
 9. Lovelo Black is used for the main bold display headings unless the prototype explicitly uses Queso Display.
-10. `queso font.ttf` is registered as Queso Display and is used for “we make them freshhhhh” and the Reviews eyebrow.
+10. `queso font.ttf` is registered as Queso Display and is used for “we make them freshhhhh”, the Reviews eyebrow and “From the feed.”
 11. Quicksand is the body/UI font.
 12. Mobile layouts must be copied from the prototype rather than improvised.
 13. Preserve working components when moving to the next section; do not make unrelated changes.
@@ -31,6 +31,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Proof Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-proof-grid.js`
 - Events: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-events.js`
 - Reviews: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-reviews.js`
+- Social Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-social-grid.js`
 
 ## Completed and confirmed
 
@@ -134,13 +135,12 @@ Confirmed starting Wix heights:
 - Tablet: `1600px`
 - Mobile: `1500px`
 
-## Current section
-
 ### 7. Reviews / “Love notes.”
 
 Tag: `queso-reviews`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype press content and imagery for Tatler Asia and Foodie.
 - Queso Display is used for “The word on the street”; Lovelo is used for “Love notes.” and publication names.
 - Quicksand is used for review copy and links.
@@ -150,11 +150,31 @@ Implemented:
 - Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
 - Intentional editable attributes retained for heading content, animation settings and all press cards.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `650px`
 - Tablet: `650px`
 - Mobile: `620px`
 
-## Next section after Reviews
+## Current section
 
-Social Grid / “From the feed.”: `queso-social-grid`
+### 8. Social Grid / “From the feed.”
+
+Tag: `queso-social-grid`
+
+Implemented:
+- Exact prototype Instagram heading, CTA and four-image content.
+- Queso Display is used for “From the feed.”; Quicksand is used for the eyebrow and CTA.
+- Four-column desktop grid and two-column tablet/mobile grid, matching the prototype.
+- Square image tiles with bordered circular outbound-arrow badges.
+- Image zoom on hover/focus with reduced-motion support.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for heading content, Instagram CTA and all four images/URLs.
+
+Recommended starting Wix heights:
+- Desktop: `760px`
+- Tablet: `1100px`
+- Mobile: `650px`
+
+## Next section after Social Grid
+
+Site Footer: `queso-site-footer`
