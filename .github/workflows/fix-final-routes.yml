@@ -1,0 +1,35 @@
+name: Fix final Queso routes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fix-final-routes.yml"
+      - "scripts/fix-final-routes.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Normalize final routes
+        run: python3 scripts/fix-final-routes.py
+
+      - name: Commit corrected routes
+        run: |
+          git config user.name "Hebronmimam"
+          git config user.email "mimam.hebron@gmail.com"
+          git add wix-components/dist/*.js
+          if git diff --cached --quiet; then
+            echo "No route corrections were needed."
+            exit 0
+          fi
+          git commit -m "Use final Wix story route"
+          git push
