@@ -463,7 +463,7 @@
             }
 
             .display {
-              font-size: clamp(42px, 14vw, 55px);
+              font-size: 55px;
               line-height: 1.02;
             }
 
@@ -485,39 +485,9 @@
             }
           }
 
-          @media (max-width: 680px) and (max-height: 620px) {
-            .hero-copy {
-              top: 43%;
-            }
-
-            .eyebrow {
-              margin-bottom: 11px;
-              font-size: 10px;
-            }
-
+          @media (max-width: 360px) {
             .display {
-              font-size: clamp(38px, 12.5vw, 48px);
-            }
-
-            .lead {
-              max-width: 310px;
-              margin: 13px 0;
-              font-size: 13px;
-              line-height: 1.45;
-            }
-
-            .button {
-              min-height: 43px;
-              padding-inline: 17px;
-              font-size: 9px;
-            }
-
-            .hero-sticker {
-              display: none;
-            }
-
-            .hero-controls {
-              bottom: 16px;
+              font-size: 50px;
             }
           }
 
