@@ -27,6 +27,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Hero: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-hero.js`
 - Fresh Intro: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-fresh-intro.js`
 - Menu Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-menu-showcase.js`
+- Flavor Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-flavor-showcase.js`
 
 ## Completed and confirmed
 
@@ -52,28 +53,47 @@ Status:
 - Quicksand used for eyebrow and body copy.
 - Stable GitHub Pages URL confirmed.
 
-## Current section
-
 ### 3. Menu Showcase
 
 Tag: `queso-menu-showcase`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype content for Birthday Suit, Artisan, Canvas and Monthly Flavor Drop.
 - Lovelo headings and Quicksand body/UI typography.
-- Four-column desktop grid.
-- Two-column tablet grid.
-- Prototype mobile horizontal swipe carousel using `82vw` cards and scroll snapping, instead of stacking all four cards vertically.
+- Four-column desktop grid and two-column tablet grid.
+- Prototype mobile horizontal swipe carousel using `82vw` cards and scroll snapping.
 - Image hover swap on pointer devices.
 - Intentional editable attributes retained.
 - `queso-add-to-cart` Custom Event retained for the later Velo/Wix Stores bridge.
 - Uses the confirmed Wix iframe sizing pattern with no `100vh` or iframe-height synchronization.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `960px`
 - Tablet: `1500px` when using the two-column layout; adjust visually.
 - Mobile: `850px`
 
-## Next section after Menu Showcase
+## Current section
 
-Flavor Showcase: `queso-flavor-showcase`
+### 4. Flavor Showcase
+
+Tag: `queso-flavor-showcase`
+
+Implemented:
+- Exact prototype split layout with the five-flavor overhead image and orange content panel.
+- Lovelo heading typography and Quicksand body/UI typography.
+- Circular “Pick your flavor” stamp.
+- Six playful flavor links with the prototype colors, irregular radii, small rotations, marks and decorative symbols.
+- Two-column flavor-link grid on desktop and one-column list on mobile.
+- Tablet/mobile layout changes to image above content, matching the prototype.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for heading content, image, stamp, CTA and flavor labels/URLs.
+
+Recommended starting Wix heights:
+- Desktop: `780px`
+- Tablet: `1450px`
+- Mobile: `1450px`
+
+## Next section after Flavor Showcase
+
+Proof Grid / “Small batch. Big care.”: `queso-proof-grid`
