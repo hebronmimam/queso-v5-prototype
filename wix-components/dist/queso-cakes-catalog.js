@@ -11,63 +11,63 @@
   const DEFAULT_ITEMS = [
     {
       tag: "Celebration",
-      tagClass: "yellow",
+      tagClass: "",
       title: "Birthday Suit",
-      copy: "Naked, playful and ready for the candles. A celebration-first cheesecake made for birthdays, tiny wins and everything in between.",
+      copy: "Naked, playful and ready for the candles.",
       price: "From HKD 368",
       image: repoAsset("assets/generated-campaign/02-birthday-suit.png"),
       imageAlt: "Birthday Suit cheesecake",
-      accent: "#f4c24a",
       primaryLabel: "Add to cart",
       primaryUrl: "/checkout",
       secondaryLabel: "See details",
       secondaryUrl: "/cakes/birthday-suit",
-      productName: "Birthday Suit"
+      productName: "Birthday Suit",
+      productPrice: "368"
     },
     {
       tag: "Polished",
       tagClass: "pink",
       title: "Artisan",
-      copy: "A refined centerpiece with a caramelized finish. Built for dinner tables, gifting and moments that deserve something polished.",
+      copy: "A refined centerpiece with an elevated finish.",
       price: "From HKD 378",
       image: repoAsset("assets/generated-campaign/03-artisan.png"),
       imageAlt: "Artisan cheesecake",
-      accent: "#efa3b5",
       primaryLabel: "Add to cart",
       primaryUrl: "/checkout",
       secondaryLabel: "See details",
       secondaryUrl: "/cakes/artisan",
-      productName: "Artisan"
+      productName: "Artisan",
+      productPrice: "378"
     },
     {
       tag: "Personalized",
       tagClass: "orange",
       title: "Canvas",
-      copy: "Your image, your message and your moment. Upload the artwork and turn the cheesecake into something completely personal.",
+      copy: "Your image or text, previewed before ordering.",
       price: "HKD 498",
       image: repoAsset("assets/generated-campaign/04-canvas.png"),
       imageAlt: "Canvas personalized cheesecake",
-      accent: "#ed6011",
       primaryLabel: "Customize",
       primaryUrl: "/cakes/canvas#customize",
       secondaryLabel: "See details",
       secondaryUrl: "/cakes/canvas",
-      productName: "Canvas"
+      productName: "Canvas",
+      productPrice: "498"
     },
     {
-      tag: "Limited drop",
+      tag: "Leaving soon",
       tagClass: "dark",
-      title: "Flavor Drop",
-      copy: "A rotating monthly flavor made in limited batches. This month: Lotus Biscoff cheesecake with a deep caramelized finish.",
+      title: "This Month's Flavor Drop",
+      copy: "Lotus Biscoff cheesecake with a spiced biscuit finish.",
       price: "HKD 528",
       image: repoAsset("site/assets/current-site/lotus-biscoff-main.png"),
-      imageAlt: "Lotus Biscoff flavor drop cheesecake",
-      accent: "#af5309",
+      imageAlt: "Lotus Biscoff cheesecake",
       primaryLabel: "Add to cart",
       primaryUrl: "/checkout",
       secondaryLabel: "See details",
       secondaryUrl: "/cakes/flavor-drop",
-      productName: "Lotus Biscoff Cheesecake"
+      productName: "Lotus Biscoff Cheesecake",
+      productPrice: "528"
     }
   ];
 
@@ -93,6 +93,7 @@
         font-display: swap;
       }
     `;
+
     document.head.appendChild(style);
   }
 
@@ -102,6 +103,10 @@
         "eyebrow",
         "title",
         "copy",
+        "type-label",
+        "type-url",
+        "flavor-label",
+        "flavor-url",
         "cart-bridge"
       ];
 
@@ -118,6 +123,7 @@
           `item-${index}-secondary-label`,
           `item-${index}-secondary-url`,
           `item-${index}-product-name`,
+          `item-${index}-product-price`,
           `item-${index}-product-id`
         );
       }
@@ -173,47 +179,35 @@
           secondaryLabel: this.value(`item-${number}-secondary-label`, fallback.secondaryLabel),
           secondaryUrl: this.value(`item-${number}-secondary-url`, fallback.secondaryUrl),
           productName: this.value(`item-${number}-product-name`, fallback.productName),
+          productPrice: this.value(`item-${number}-product-price`, fallback.productPrice),
           productId: this.value(`item-${number}-product-id`, "")
         };
       });
     }
 
     render() {
-      const eyebrow = this.value("eyebrow", "Four personalities. One serious cheesecake habit.");
+      const eyebrow = this.value("eyebrow", "The complete lineup");
       const title = this.value("title", "Choose your cake.");
       const copy = this.value(
         "copy",
-        "Pick the one that fits the moment. Each cake is made fresh in Hong Kong in small batches."
+        "Quick add the standard option, or open details to select flavor, size and quantity."
       );
+      const typeLabel = this.value("type-label", "Shop by cake type");
+      const typeUrl = this.value("type-url", "/cakes");
+      const flavorLabel = this.value("flavor-label", "Shop by flavor");
+      const flavorUrl = this.value("flavor-url", "/flavors");
 
       const cards = this.items.map((item, index) => `
-        <article class="cake-card" style="--card-accent:${this.escape(item.accent)}">
-          <div class="cake-card__media">
-            <img
-              src="${this.escape(item.image)}"
-              alt="${this.escape(item.imageAlt)}"
-              loading="lazy"
-              decoding="async"
-            >
-            <span class="cake-card__number" aria-hidden="true">0${index + 1}</span>
-          </div>
-
-          <div class="cake-card__body">
+        <article class="product-card">
+          <img src="${this.escape(item.image)}" alt="${this.escape(item.imageAlt)}" loading="lazy" decoding="async">
+          <div class="product-body">
             <span class="tag tag--${this.escape(item.tagClass)}">${this.escape(item.tag)}</span>
             <h3>${this.escape(item.title)}</h3>
-            <p class="cake-card__copy">${this.escape(item.copy)}</p>
-            <p class="price">${this.escape(item.price)}</p>
-
-            <div class="cake-card__actions">
-              <a
-                class="button button--primary"
-                href="${this.escape(item.primaryUrl)}"
-                data-primary-action="${index}"
-              >${this.escape(item.primaryLabel)}</a>
-
-              <a class="button button--secondary" href="${this.escape(item.secondaryUrl)}">
-                ${this.escape(item.secondaryLabel)}
-              </a>
+            <p>${this.escape(item.copy)}</p>
+            <span class="price">${this.escape(item.price)}</span>
+            <div class="card-actions">
+              <a class="button button--primary" href="${this.escape(item.primaryUrl)}" data-primary-action="${index}">${this.escape(item.primaryLabel)}</a>
+              <a class="button" href="${this.escape(item.secondaryUrl)}">${this.escape(item.secondaryLabel)}</a>
             </div>
           </div>
         </article>
@@ -228,7 +222,6 @@
             --brown: #3d2416;
             --pink: #efa3b5;
             --pad: clamp(20px, 5vw, 76px);
-
             display: block;
             width: 100%;
             height: 100%;
@@ -239,59 +232,66 @@
             font-family: "Quicksand", Arial, sans-serif;
             font-weight: 550;
             font-synthesis: none;
-            text-rendering: geometricPrecision;
           }
 
-          :host([data-wix-frame]) {
-            height: auto;
-          }
+          :host([data-wix-frame]) { height: auto; }
+          *, *::before, *::after { box-sizing: border-box; }
+          a { color: inherit; text-decoration: none; }
+          img { display: block; max-width: 100%; }
 
-          *, *::before, *::after {
-            box-sizing: border-box;
-          }
-
-          a {
-            color: inherit;
-            text-decoration: none;
-          }
-
-          img {
-            display: block;
-            max-width: 100%;
-          }
-
-          .catalog {
+          .section {
             width: 100%;
             height: 100%;
             min-height: 0;
-            padding: clamp(72px, 8vw, 120px) var(--pad);
+            padding: clamp(76px, 9vw, 130px) var(--pad);
             overflow: hidden;
             background: var(--cream);
-            border-bottom: 2px solid var(--brown);
           }
 
-          :host([data-wix-frame]) .catalog {
+          :host([data-wix-frame]) .section {
             position: fixed;
             inset: 0;
             width: auto;
             height: auto;
           }
 
-          .catalog-heading {
+          .category-nav {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
-            gap: 48px;
+            grid-template-columns: repeat(2, 1fr);
+            margin-bottom: 45px;
+            overflow: hidden;
+            border: 2px solid var(--brown);
+            border-radius: 14px;
+          }
+
+          .category-nav a {
+            padding: 18px;
+            background: #fff;
+            font-size: 11px;
+            font-weight: 850;
+            text-align: center;
+            text-transform: uppercase;
+          }
+
+          .category-nav a:first-child { border-right: 2px solid var(--brown); }
+          .category-nav a.active,
+          .category-nav a:hover,
+          .category-nav a:focus-visible { background: var(--yellow); }
+
+          .section-heading {
+            margin-bottom: 42px;
+            display: flex;
             align-items: end;
-            margin-bottom: 48px;
+            justify-content: space-between;
+            gap: 30px;
           }
 
           .eyebrow {
-            margin: 0 0 16px;
+            margin: 0 0 17px;
             color: #a84c09;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 850;
             letter-spacing: 0.13em;
-            line-height: 1.4;
             text-transform: uppercase;
           }
 
@@ -304,292 +304,176 @@
           }
 
           h2 {
-            max-width: 850px;
-            font-size: clamp(56px, 7vw, 102px);
-            line-height: 0.94;
+            font-size: clamp(48px, 6vw, 88px);
+            line-height: 1;
           }
 
-          .intro-copy {
-            margin: 0 0 5px;
-            font-size: clamp(15px, 1.3vw, 18px);
-            line-height: 1.55;
+          .section-copy {
+            max-width: 520px;
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.6;
           }
 
-          .cake-grid {
+          .product-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
           }
 
-          .cake-card {
-            display: grid;
-            grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+          .product-card {
             min-width: 0;
-            min-height: 500px;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
             border: 2px solid var(--brown);
-            border-radius: 22px;
+            border-radius: 18px;
             background: #fff;
           }
 
-          .cake-card__media {
-            position: relative;
-            min-width: 0;
-            min-height: 0;
-            overflow: hidden;
-            background: var(--card-accent);
-            border-right: 2px solid var(--brown);
-          }
-
-          .cake-card__media img {
+          .product-card > img {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 1;
             object-fit: cover;
-            transition: transform 350ms ease;
+            border-bottom: 2px solid var(--brown);
           }
 
-          .cake-card:hover .cake-card__media img,
-          .cake-card:focus-within .cake-card__media img {
-            transform: scale(1.025);
-          }
-
-          .cake-card__number {
-            position: absolute;
-            left: 16px;
-            bottom: 12px;
-            color: var(--cream);
-            font-family: "Lovelo", Arial, sans-serif;
-            font-size: 48px;
-            font-weight: 900;
-            line-height: 1;
-            text-shadow: 0 2px 0 rgba(61, 36, 22, 0.3);
-          }
-
-          .cake-card__body {
-            min-width: 0;
-            padding: 28px;
+          .product-body {
+            flex: 1;
+            padding: 19px;
             display: flex;
             flex-direction: column;
           }
 
           .tag {
             align-self: flex-start;
-            padding: 7px 10px;
+            padding: 6px 9px;
             border: 1.5px solid var(--brown);
             border-radius: 999px;
+            background: var(--yellow);
             font-size: 8px;
             font-weight: 900;
             letter-spacing: 0.08em;
             text-transform: uppercase;
           }
 
-          .tag--yellow {
-            background: var(--yellow);
+          .tag--pink { background: var(--pink); }
+          .tag--orange { background: var(--orange); color: #fff; }
+          .tag--dark { background: var(--brown); color: #fff; }
+
+          .product-card h3 {
+            margin: 16px 0 9px;
+            font-size: clamp(23px, 2.2vw, 32px);
+            line-height: 1.03;
           }
 
-          .tag--pink {
-            background: var(--pink);
-          }
-
-          .tag--orange {
-            background: var(--orange);
-            color: #fff;
-          }
-
-          .tag--dark {
-            background: var(--brown);
-            color: var(--cream);
-          }
-
-          h3 {
-            margin-top: 20px;
-            font-size: clamp(34px, 3vw, 54px);
-            line-height: 0.98;
-          }
-
-          .cake-card__copy {
-            margin: 18px 0 0;
-            font-size: 14px;
-            line-height: 1.55;
+          .product-card p {
+            margin: 0 0 16px;
+            font-size: 12px;
+            line-height: 1.5;
           }
 
           .price {
-            margin: auto 0 0;
-            padding-top: 28px;
-            font-size: 12px;
+            margin-top: auto;
+            font-size: 13px;
             font-weight: 850;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
           }
 
-          .cake-card__actions {
+          .card-actions {
+            margin-top: 17px;
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 9px;
-            margin-top: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
           }
 
           .button {
-            min-height: 48px;
-            padding: 0 18px;
+            min-height: 42px;
+            padding: 0 15px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             border: 2px solid var(--brown);
             border-radius: 10px;
-            font-size: 10px;
+            background: #fff;
+            font-size: 9px;
             font-weight: 850;
             letter-spacing: 0.05em;
             text-align: center;
             text-transform: uppercase;
-            transition: transform 150ms ease, background 150ms ease;
+            transition: transform 150ms ease;
           }
 
           .button:hover,
-          .button:focus-visible {
-            transform: translateY(-2px);
+          .button:focus-visible { transform: translateY(-2px); }
+          .button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+          .button--primary { background: var(--orange); color: #fff; }
+
+          @media (max-width: 980px) {
+            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           }
 
-          .button:focus-visible {
-            outline: 3px solid var(--yellow);
-            outline-offset: 3px;
-          }
-
-          .button--primary {
-            background: var(--orange);
-            color: #fff;
-          }
-
-          .button--secondary {
-            background: var(--cream);
-          }
-
-          @media (max-width: 1180px) {
-            .catalog-heading {
-              grid-template-columns: 1fr;
-              gap: 18px;
-            }
-
-            .intro-copy {
-              max-width: 620px;
-            }
-
-            .cake-card {
-              grid-template-columns: 1fr;
-              grid-template-rows: 330px 1fr;
-              min-height: 710px;
-            }
-
-            .cake-card__media {
-              border-right: 0;
-              border-bottom: 2px solid var(--brown);
-            }
-          }
-
-          @media (max-width: 760px) {
-            .catalog {
-              padding: 58px 20px;
-            }
-
-            .catalog-heading {
-              margin-bottom: 32px;
-            }
-
-            .eyebrow {
-              font-size: 9px;
-            }
-
-            h2 {
-              font-size: clamp(48px, 14vw, 68px);
-            }
-
-            .intro-copy {
-              font-size: 15px;
-            }
-
-            .cake-grid {
-              grid-template-columns: 1fr;
-              gap: 18px;
-            }
-
-            .cake-card {
-              grid-template-rows: 340px auto;
-              min-height: 620px;
-              border-radius: 18px;
-            }
-
-            .cake-card__body {
-              padding: 22px;
-            }
-
-            h3 {
-              font-size: 40px;
-            }
-
-            .cake-card__copy {
-              font-size: 14px;
-            }
-          }
-
-          @media (max-width: 390px) {
-            .cake-card {
-              grid-template-rows: 300px auto;
-            }
-
-            h3 {
-              font-size: 36px;
-            }
+          @media (max-width: 680px) {
+            .section { padding: 70px 20px; }
+            .category-nav { margin-bottom: 30px; }
+            .section-heading { display: block; }
+            .section-copy { margin-top: 18px; }
+            h2 { font-size: 49px; line-height: 1.02; }
+            .product-grid { grid-template-columns: 1fr; }
           }
 
           @media (prefers-reduced-motion: reduce) {
-            .cake-card__media img,
-            .button {
-              transition: none;
-            }
+            .button { transition: none; }
           }
         </style>
 
-        <section class="catalog" aria-labelledby="queso-cakes-catalog-title">
-          <header class="catalog-heading">
+        <section class="section" id="shop" aria-labelledby="queso-cakes-catalog-title">
+          <nav class="category-nav" aria-label="Shop navigation">
+            <a class="active" href="${this.escape(typeUrl)}">${this.escape(typeLabel)}</a>
+            <a href="${this.escape(flavorUrl)}">${this.escape(flavorLabel)}</a>
+          </nav>
+
+          <header class="section-heading">
             <div>
               <p class="eyebrow">${this.escape(eyebrow)}</p>
               <h2 id="queso-cakes-catalog-title">${this.escape(title)}</h2>
             </div>
-            <p class="intro-copy">${this.escape(copy)}</p>
+            <p class="section-copy">${this.escape(copy)}</p>
           </header>
 
-          <div class="cake-grid">
-            ${cards}
-          </div>
+          <div class="product-grid">${cards}</div>
         </section>
       `;
     }
 
     bindEvents() {
-      const bridgeEnabled = ["true", "1", "on", "yes"].includes(
-        (this.getAttribute("cart-bridge") || "").toLowerCase()
-      );
-
       this.shadowRoot.querySelectorAll("[data-primary-action]").forEach((link) => {
         link.addEventListener("click", (event) => {
           const index = Number(link.dataset.primaryAction);
           const item = this.items[index];
+          const isAddToCart = item && item.primaryLabel.trim().toLowerCase() === "add to cart";
+          if (!isAddToCart) return;
 
-          if (!item || item.primaryLabel.toLowerCase() !== "add to cart") return;
-          if (!bridgeEnabled) return;
+          const bridgeEnabled = ["true", "1", "on", "yes"].includes(
+            (this.getAttribute("cart-bridge") || "").toLowerCase()
+          );
 
-          event.preventDefault();
+          if (bridgeEnabled) event.preventDefault();
 
-          this.dispatchEvent(new CustomEvent("queso-add-to-cart", {
+          const customEvent = new CustomEvent("queso-add-to-cart", {
             bubbles: true,
             composed: true,
+            cancelable: true,
             detail: {
               itemIndex: index,
               productName: item.productName,
               productId: item.productId,
-              productPrice: item.price
+              productPrice: item.productPrice,
+              fallbackUrl: item.primaryUrl
             }
-          }));
+          });
+
+          this.dispatchEvent(customEvent);
+          if (customEvent.defaultPrevented) event.preventDefault();
         });
       });
     }
