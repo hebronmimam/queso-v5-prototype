@@ -28,6 +28,7 @@ These rules are confirmed and must not be changed without an explicit reason:
 - Fresh Intro: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-fresh-intro.js`
 - Menu Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-menu-showcase.js`
 - Flavor Showcase: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-flavor-showcase.js`
+- Proof Grid: `https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-proof-grid.js`
 
 ## Completed and confirmed
 
@@ -73,13 +74,12 @@ Confirmed starting Wix heights:
 - Tablet: `1500px` when using the two-column layout; adjust visually.
 - Mobile: `850px`
 
-## Current section
-
 ### 4. Flavor Showcase
 
 Tag: `queso-flavor-showcase`
 
-Implemented:
+Status:
+- Confirmed working by Hebronmimam.
 - Exact prototype split layout with the five-flavor overhead image and orange content panel.
 - Lovelo heading typography and Quicksand body/UI typography.
 - Circular “Pick your flavor” stamp.
@@ -89,11 +89,30 @@ Implemented:
 - Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
 - Intentional editable attributes retained for heading content, image, stamp, CTA and flavor labels/URLs.
 
-Recommended starting Wix heights:
+Confirmed starting Wix heights:
 - Desktop: `780px`
 - Tablet: `1450px`
 - Mobile: `1450px`
 
-## Next section after Flavor Showcase
+## Current section
 
-Proof Grid / “Small batch. Big care.”: `queso-proof-grid`
+### 5. Proof Grid / “Small batch. Big care.”
+
+Tag: `queso-proof-grid`
+
+Implemented:
+- Exact prototype copy for Baked Fresh, Premium Ingredients, Halal and Extra Love.
+- Prototype CSS-built brand icons rather than generic text symbols.
+- Lovelo heading/card titles and Quicksand body/UI typography.
+- Four-column desktop grid, two-column tablet grid and one-column mobile layout.
+- Uses the confirmed Wix iframe sizing pattern with `position: fixed; inset: 0`, `min-height: 0`, and no viewport-height synchronization.
+- Intentional editable attributes retained for the section heading and each card's title/copy.
+
+Recommended starting Wix heights:
+- Desktop: `590px`
+- Tablet: `820px`
+- Mobile: `980px`
+
+## Next section after Proof Grid
+
+Events / “Upcoming popups.”: `queso-events`
