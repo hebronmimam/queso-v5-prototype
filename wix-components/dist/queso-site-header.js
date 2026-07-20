@@ -80,7 +80,8 @@
         "connect-url",
         "cart-label",
         "cart-url",
-        "cart-count"
+        "cart-count",
+        "cart-bridge"
       ];
 
       for (let index = 1; index <= 4; index += 1) {
@@ -571,6 +572,14 @@
       const cartLink = this.shadowRoot.querySelector("[data-cart-link]");
 
       cartLink?.addEventListener("click", (clickEvent) => {
+        const bridgeEnabled = ["true", "1", "on", "yes"].includes(
+          (this.getAttribute("cart-bridge") || "").toLowerCase()
+        );
+
+        if (bridgeEnabled) {
+          clickEvent.preventDefault();
+        }
+
         const customEvent = new CustomEvent("queso-cart-open", {
           bubbles: true,
           composed: true,

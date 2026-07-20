@@ -106,7 +106,7 @@
 
   class QuesoMenuShowcase extends HTMLElement {
     static get observedAttributes() {
-      const attributes = ["eyebrow", "title", "link-label", "link-url"];
+      const attributes = ["eyebrow", "title", "link-label", "link-url", "cart-bridge"];
 
       for (let index = 1; index <= 4; index += 1) {
         attributes.push(
@@ -525,6 +525,14 @@
           const index = Number(link.dataset.primaryAction);
           const item = this.items[index];
           if (!item || !item.primaryLabel.toLowerCase().includes("add")) return;
+
+          const bridgeEnabled = ["true", "1", "on", "yes"].includes(
+            (this.getAttribute("cart-bridge") || "").toLowerCase()
+          );
+
+          if (bridgeEnabled) {
+            event.preventDefault();
+          }
 
           const customEvent = new CustomEvent("queso-add-to-cart", {
             bubbles: true,
