@@ -24,15 +24,40 @@ The following homepage sections have been added and confirmed working in Wix:
 
 The existing stable GitHub Pages URLs remain unchanged.
 
+## Current implementation step
+
+### Site Header verification
+
+Tag: `queso-site-header`
+
+Stable URL:
+`https://hebronmimam.github.io/queso-v5-prototype/wix-components/dist/queso-site-header.js`
+
+Implemented in the verification pass:
+
+- Applied the confirmed Wix iframe sizing pattern: Wix controls the height; the internal header fills the iframe with `position: fixed; inset: 0`.
+- Removed the old forced `min-height` behaviour.
+- Preserved the 296px desktop structure and 170px tablet/mobile structure.
+- Preserved the announcement marquee, logo, desktop navigation, cake preview menu, mobile category strip and mobile navigation.
+- Preserved all lowercase editable attributes.
+- Preserved the `queso-cart-open` Custom Event.
+- Corrected cart fallback behaviour: the normal `/cart` link remains active unless the future Wix/Velo bridge explicitly prevents the Custom Event.
+- No approved homepage component was changed.
+
+Recommended starting Wix heights:
+
+- Desktop: `296px`
+- Tablet/mobile: `170px`
+
+Status: code updated; awaiting visual confirmation in Wix before marking the header complete.
+
 ## Remaining implementation order
 
-### 1. Site Header verification
+### 1. Confirm Site Header in Wix
 
-- Apply the confirmed Wix iframe sizing pattern to `queso-site-header`.
 - Confirm desktop and mobile heights.
 - Verify logo, announcement bar, cake preview menu and mobile navigation.
-- Verify all internal Wix page routes.
-- Confirm the cart action emits `queso-cart-open` without breaking its fallback URL.
+- Confirm the cart link still follows its fallback route before the Velo bridge is connected.
 
 ### 2. Homepage link and route pass
 
