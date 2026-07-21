@@ -27,12 +27,24 @@
 
   function patch(ProductDetail) {
     const prototype = ProductDetail?.prototype;
-    if (!prototype || prototype.__quesoProductionBuildPatchedV2) return;
+    if (!prototype || prototype.__quesoProductionBuildPatchedV3) return;
 
+    const originalRender = prototype.render;
     const originalAttributeChanged = prototype.attributeChangedCallback;
     const originalBindEvents = prototype.bindEvents;
     const originalBindCanvasEvents = prototype.bindCanvasEvents;
     const originalUpdateCanvasCustomizer = prototype.updateCanvasV5Customizer;
+
+    prototype.removeQuesoEmbeddedGoodStuff = function removeQuesoEmbeddedGoodStuff() {
+      this.shadowRoot?.querySelectorAll(
+        ".product-proof, .product-good-stuff, [data-queso-good-stuff]"
+      ).forEach((section) => section.remove());
+    };
+
+    prototype.render = function render() {
+      originalRender.call(this);
+      this.removeQuesoEmbeddedGoodStuff();
+    };
 
     prototype.centerQuesoCanvasPreviewMessage = function centerQuesoCanvasPreviewMessage() {
       const message = this.shadowRoot?.querySelector("[data-canvas-preview-message]");
@@ -56,6 +68,7 @@
     prototype.updateCanvasV5Customizer = function updateCanvasV5Customizer() {
       originalUpdateCanvasCustomizer.call(this);
       this.centerQuesoCanvasPreviewMessage();
+      this.removeQuesoEmbeddedGoodStuff();
     };
 
     prototype.clearQuesoLocalAddTimers = function clearQuesoLocalAddTimers() {
@@ -204,6 +217,7 @@
       originalBindCanvasEvents.call(this);
       this.installQuesoLocalAddFeedback();
       this.centerQuesoCanvasPreviewMessage();
+      this.removeQuesoEmbeddedGoodStuff();
     };
 
     prototype.bindEvents = function bindEvents() {
@@ -212,6 +226,7 @@
       if (this.isCanvasProduct?.()) {
         this.centerQuesoCanvasPreviewMessage();
       }
+      this.removeQuesoEmbeddedGoodStuff();
     };
 
     prototype.attributeChangedCallback = function attributeChangedCallback(
@@ -232,12 +247,13 @@
       originalAttributeChanged.call(this, name, oldValue, newValue);
     };
 
-    prototype.__quesoProductionBuildPatchedV2 = true;
+    prototype.__quesoProductionBuildPatchedV3 = true;
 
     document.querySelectorAll("queso-product-detail").forEach((element) => {
       element.updateQuesoCartFeedback?.();
       element.installQuesoLocalAddFeedback?.();
       element.centerQuesoCanvasPreviewMessage?.();
+      element.removeQuesoEmbeddedGoodStuff?.();
     });
   }
 
@@ -248,7 +264,7 @@
 
   const script = document.createElement("script");
   const target = new URL(canvasUrl);
-  target.searchParams.set("build", "production-4");
+  target.searchParams.set("build", "production-5");
   target.searchParams.set("cache", String(Date.now()));
   script.src = target.href;
   script.async = false;
