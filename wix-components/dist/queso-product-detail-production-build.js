@@ -6,6 +6,8 @@
     ? new URL("queso-product-detail-canvas-v5.js", scriptUrl).href
     : "";
 
+  const normalize = (value) => String(value ?? "").trim().toLowerCase();
+
   function waitForCanvas(attempt = 0) {
     const ProductDetail = customElements.get("queso-product-detail");
     const prototype = ProductDetail?.prototype;
@@ -25,9 +27,10 @@
 
   function patch(ProductDetail) {
     const prototype = ProductDetail?.prototype;
-    if (!prototype || prototype.__quesoProductionBuildPatched) return;
+    if (!prototype || prototype.__quesoProductionBuildPatchedV2) return;
 
     const originalAttributeChanged = prototype.attributeChangedCallback;
+    const originalBindEvents = prototype.bindEvents;
     const originalBindCanvasEvents = prototype.bindCanvasEvents;
     const originalUpdateCanvasCustomizer = prototype.updateCanvasV5Customizer;
 
@@ -53,6 +56,18 @@
     prototype.updateCanvasV5Customizer = function updateCanvasV5Customizer() {
       originalUpdateCanvasCustomizer.call(this);
       this.centerQuesoCanvasPreviewMessage();
+    };
+
+    prototype.clearQuesoLocalAddTimers = function clearQuesoLocalAddTimers() {
+      if (this.__quesoLocalAddedTimer) {
+        clearTimeout(this.__quesoLocalAddedTimer);
+        this.__quesoLocalAddedTimer = 0;
+      }
+
+      if (this.__quesoLocalResetTimer) {
+        clearTimeout(this.__quesoLocalResetTimer);
+        this.__quesoLocalResetTimer = 0;
+      }
     };
 
     prototype.updateQuesoCartFeedback = function updateQuesoCartFeedback() {
@@ -89,28 +104,89 @@
       });
     };
 
-    prototype.beginQuesoLocalAddFeedback = function beginQuesoLocalAddFeedback() {
-      if (this.__quesoLocalAddResetTimer) {
-        clearTimeout(this.__quesoLocalAddResetTimer);
+    prototype.canBeginQuesoLocalAddFeedback = function canBeginQuesoLocalAddFeedback() {
+      if (this.isEditorPreview || !this.isAvailable) return false;
+
+      const requiredMissing = (Array.isArray(this.customTextFields)
+        ? this.customTextFields
+        : []
+      ).some((field, index) => {
+        if (!(field?.mandatory || field?.required)) return false;
+        const title = String(field?.title || field?.name || `Custom text ${index + 1}`);
+        return !String(this.customTextValues?.[title] || "").trim();
+      });
+
+      if (requiredMissing) return false;
+
+      if (!this.isCanvasProduct?.()) return true;
+
+      const decorOption = (Array.isArray(this.options) ? this.options : []).find(
+        (option) => normalize(option?.name) === "decor"
+      );
+      const decor = normalize(this.selectedChoices?.[decorOption?.name]);
+
+      if (decor === "letters") {
+        const messageField = this.canvasField?.("Cake Message");
+        const messageTitle = String(messageField?.title || messageField?.name || "Cake Message");
+        return Boolean(String(this.customTextValues?.[messageTitle] || "").trim());
       }
 
+      if (decor === "picture") {
+        const photoField = this.canvasField?.("Photo Upload URL");
+        const photoTitle = String(photoField?.title || photoField?.name || "Photo Upload URL");
+        const storedPhoto = String(this.customTextValues?.[photoTitle] || "").trim();
+        const photoState = this.canvasPhotoState?.() || {};
+        return photoState.status !== "uploading" && Boolean(storedPhoto || photoState.fileId);
+      }
+
+      return true;
+    };
+
+    prototype.showQuesoLocalAddState = function showQuesoLocalAddState(
+      state,
+      message,
+      buttonLabel,
+      disabled
+    ) {
       const status = this.shadowRoot?.querySelector(".status");
       if (status) {
-        status.classList.remove("idle", "success", "error");
-        status.classList.add("adding");
-        status.textContent = "Adding your cake…";
+        status.classList.remove("idle", "adding", "success", "error");
+        status.classList.add(state);
+        status.textContent = message;
       }
 
       const button = this.shadowRoot?.querySelector("[data-add-to-cart]");
       if (button) {
-        button.disabled = true;
-        button.textContent = "Adding…";
+        button.disabled = Boolean(disabled);
+        button.textContent = buttonLabel;
       }
+    };
 
-      this.__quesoLocalAddResetTimer = setTimeout(() => {
-        this.__quesoLocalAddResetTimer = 0;
-        this.updateQuesoCartFeedback();
-      }, 6000);
+    prototype.beginQuesoLocalAddFeedback = function beginQuesoLocalAddFeedback() {
+      this.clearQuesoLocalAddTimers();
+
+      this.showQuesoLocalAddState(
+        "adding",
+        "Adding your cake…",
+        "Adding…",
+        true
+      );
+
+      this.__quesoLocalAddedTimer = setTimeout(() => {
+        this.__quesoLocalAddedTimer = 0;
+
+        this.showQuesoLocalAddState(
+          "success",
+          "Added to cart.",
+          "Added",
+          true
+        );
+
+        this.__quesoLocalResetTimer = setTimeout(() => {
+          this.__quesoLocalResetTimer = 0;
+          this.updateQuesoCartFeedback();
+        }, 2200);
+      }, 900);
     };
 
     prototype.installQuesoLocalAddFeedback = function installQuesoLocalAddFeedback() {
@@ -119,7 +195,7 @@
 
       button.dataset.quesoLocalAddFeedback = "true";
       button.addEventListener("click", () => {
-        if (this.isEditorPreview || !this.isAvailable) return;
+        if (!this.canBeginQuesoLocalAddFeedback()) return;
         this.beginQuesoLocalAddFeedback();
       });
     };
@@ -130,6 +206,14 @@
       this.centerQuesoCanvasPreviewMessage();
     };
 
+    prototype.bindEvents = function bindEvents() {
+      originalBindEvents.call(this);
+      this.installQuesoLocalAddFeedback();
+      if (this.isCanvasProduct?.()) {
+        this.centerQuesoCanvasPreviewMessage();
+      }
+    };
+
     prototype.attributeChangedCallback = function attributeChangedCallback(
       name,
       oldValue,
@@ -137,10 +221,10 @@
     ) {
       if (!this.isConnected || oldValue === newValue) return;
 
-      if (
-        this.isCanvasProduct?.() &&
-        (name === "cart-state" || name === "cart-message")
-      ) {
+      if (name === "cart-state" || name === "cart-message") {
+        if (name === "cart-state" && normalize(newValue) === "error") {
+          this.clearQuesoLocalAddTimers();
+        }
         this.scheduleQuesoCartFeedback();
         return;
       }
@@ -148,7 +232,7 @@
       originalAttributeChanged.call(this, name, oldValue, newValue);
     };
 
-    prototype.__quesoProductionBuildPatched = true;
+    prototype.__quesoProductionBuildPatchedV2 = true;
 
     document.querySelectorAll("queso-product-detail").forEach((element) => {
       element.updateQuesoCartFeedback?.();
@@ -164,7 +248,7 @@
 
   const script = document.createElement("script");
   const target = new URL(canvasUrl);
-  target.searchParams.set("build", "production-3");
+  target.searchParams.set("build", "production-4");
   target.searchParams.set("cache", String(Date.now()));
   script.src = target.href;
   script.async = false;
