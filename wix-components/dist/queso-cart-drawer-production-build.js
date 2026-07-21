@@ -23,9 +23,63 @@
 
   function patch(CartDrawer) {
     const prototype = CartDrawer?.prototype;
-    if (!prototype || prototype.__quesoOptimisticCartPatched) return;
+    if (!prototype || prototype.__quesoOptimisticCartPatchedV2) return;
 
     const originalBindEvents = prototype.bindEvents;
+
+    prototype.installQuesoCartPresentation = function installQuesoCartPresentation() {
+      if (!this.shadowRoot) return;
+
+      let style = this.shadowRoot.querySelector("style[data-queso-cart-presentation]");
+      if (!style) {
+        style = document.createElement("style");
+        style.dataset.quesoCartPresentation = "true";
+        style.textContent = `
+          .item-thumb.is-custom-text {
+            position: relative;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #fdf3e6;
+          }
+
+          .item-thumb.is-custom-text::before {
+            content: "";
+            position: absolute;
+            inset: 9px;
+            border: 1px dashed rgba(61, 36, 22, 0.42);
+            pointer-events: none;
+          }
+
+          .item-thumb.is-custom-text > span {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 88%;
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.05;
+            text-align: center;
+          }
+
+          .item-thumb.is-custom-text small,
+          .item-thumb .custom-badge {
+            display: none !important;
+          }
+        `;
+        this.shadowRoot.appendChild(style);
+      }
+
+      this.shadowRoot.querySelectorAll(
+        ".item-thumb.is-custom-text small, .item-thumb .custom-badge"
+      ).forEach((label) => label.remove());
+    };
 
     prototype.updateQuesoOptimisticQuantity = function updateQuesoOptimisticQuantity(
       button
@@ -56,11 +110,6 @@
 
       const quantityButtons = control.querySelectorAll("[data-cart-quantity]");
 
-      /*
-       * Keep the clicked button's current data value until the base event
-       * listener has emitted it to Wix. Update both controls in a microtask
-       * immediately after the click event finishes.
-       */
       queueMicrotask(() => {
         if (quantityButtons[0]) {
           quantityButtons[0].dataset.cartNextQuantity = String(
@@ -69,9 +118,7 @@
           quantityButtons[0].disabled = requestedQuantity <= 1;
         }
         if (quantityButtons[1]) {
-          quantityButtons[1].dataset.cartNextQuantity = String(
-            requestedQuantity + 1
-          );
+          quantityButtons[1].dataset.cartNextQuantity = String(requestedQuantity + 1);
         }
       });
 
@@ -98,7 +145,65 @@
       }
     };
 
-    prototype.installQuesoOptimisticQuantity = function installQuesoOptimisticQuantity() {
+    prototype.updateQuesoOptimisticRemoval = function updateQuesoOptimisticRemoval(
+      button
+    ) {
+      const article = button.closest("[data-line-item]");
+      if (!article) return;
+
+      const quantity = Math.max(
+        1,
+        Number(article.querySelector(".quantity-control span")?.textContent || 1)
+      );
+
+      const lineTotalText = article.querySelector(".item-footer > strong")?.textContent || "";
+      const unitPriceText = article.querySelector(".unit-price")?.textContent || "";
+      const removalAmount = readMoney(lineTotalText) || (readMoney(unitPriceText) * quantity);
+
+      queueMicrotask(() => {
+        article.remove();
+
+        const remainingArticles = Array.from(
+          this.shadowRoot?.querySelectorAll("[data-line-item]") || []
+        );
+
+        const count = this.shadowRoot?.querySelector(".drawer-header p");
+        if (count) {
+          const existingCount = Math.max(
+            0,
+            Number.parseInt(count.textContent || "0", 10) || 0
+          );
+          const nextCount = Math.max(0, existingCount - quantity);
+          count.textContent = `${nextCount} ${nextCount === 1 ? "item" : "items"}`;
+        }
+
+        const subtotal = this.shadowRoot?.querySelector(".subtotal-row strong");
+        if (subtotal) {
+          subtotal.textContent = formatMoney(
+            Math.max(0, readMoney(subtotal.textContent) - removalAmount)
+          );
+        }
+
+        if (!remainingArticles.length) {
+          const content = this.shadowRoot?.querySelector(".cart-content");
+          if (content) {
+            content.innerHTML = `
+              <div class="empty-state">
+                <strong>Your cart is empty.</strong>
+                <p>Choose a Queso cake, make it yours, then come back here.</p>
+              </div>
+            `;
+          }
+
+          const viewCart = this.shadowRoot?.querySelector("[data-cart-page]");
+          const checkout = this.shadowRoot?.querySelector("[data-cart-checkout]");
+          if (viewCart) viewCart.disabled = true;
+          if (checkout) checkout.disabled = true;
+        }
+      });
+    };
+
+    prototype.installQuesoOptimisticCartActions = function installQuesoOptimisticCartActions() {
       this.shadowRoot?.querySelectorAll("[data-cart-quantity]").forEach((button) => {
         if (button.dataset.quesoOptimisticQuantity === "true") return;
 
@@ -111,17 +216,32 @@
           { capture: true }
         );
       });
+
+      this.shadowRoot?.querySelectorAll("[data-cart-remove]").forEach((button) => {
+        if (button.dataset.quesoOptimisticRemoval === "true") return;
+
+        button.dataset.quesoOptimisticRemoval = "true";
+        button.addEventListener(
+          "click",
+          () => {
+            this.updateQuesoOptimisticRemoval(button);
+          },
+          { capture: true }
+        );
+      });
     };
 
     prototype.bindEvents = function bindEvents() {
       originalBindEvents.call(this);
-      this.installQuesoOptimisticQuantity();
+      this.installQuesoCartPresentation();
+      this.installQuesoOptimisticCartActions();
     };
 
-    prototype.__quesoOptimisticCartPatched = true;
+    prototype.__quesoOptimisticCartPatchedV2 = true;
 
     document.querySelectorAll("queso-cart-drawer").forEach((element) => {
-      element.installQuesoOptimisticQuantity?.();
+      element.installQuesoCartPresentation?.();
+      element.installQuesoOptimisticCartActions?.();
     });
   }
 
@@ -130,7 +250,7 @@
     return;
   }
 
-  baseUrl.searchParams.set("build", "optimistic-cart-3");
+  baseUrl.searchParams.set("build", "optimistic-cart-4");
   baseUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
