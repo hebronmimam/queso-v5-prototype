@@ -21,9 +21,20 @@
     })}`;
   }
 
+  function installFrameViewport() {
+    document.documentElement.style.height = "100%";
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+
+    document.body.style.height = "100%";
+    document.body.style.margin = "0";
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+  }
+
   function patch(CartDrawer) {
     const prototype = CartDrawer?.prototype;
-    if (!prototype || prototype.__quesoOptimisticCartPatchedV2) return;
+    if (!prototype || prototype.__quesoOptimisticCartPatchedV3) return;
 
     const originalBindEvents = prototype.bindEvents;
 
@@ -35,6 +46,44 @@
         style = document.createElement("style");
         style.dataset.quesoCartPresentation = "true";
         style.textContent = `
+          :host,
+          :host([data-wix-frame]) {
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+          }
+
+          .cart-shell {
+            height: 100dvh !important;
+            min-height: 100dvh !important;
+            max-height: 100dvh !important;
+            overflow: hidden !important;
+          }
+
+          .drawer {
+            height: 100dvh !important;
+            min-height: 0 !important;
+            max-height: 100dvh !important;
+            overflow: hidden !important;
+          }
+
+          .cart-content {
+            min-height: 0 !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            overscroll-behavior-y: contain;
+            scrollbar-gutter: stable;
+          }
+
+          .drawer-header,
+          .drawer-footer {
+            position: relative;
+            z-index: 2;
+          }
+
           .item-thumb.is-custom-text {
             position: relative;
             padding: 15px;
@@ -71,6 +120,182 @@
           .item-thumb.is-custom-text small,
           .item-thumb .custom-badge {
             display: none !important;
+          }
+
+          @media (max-width: 650px) {
+            .drawer-header {
+              min-height: 76px;
+              padding: 16px 18px;
+            }
+
+            .drawer-header h1 {
+              font-size: 30px;
+            }
+
+            .close-button {
+              width: 42px;
+              height: 42px;
+              font-size: 25px;
+            }
+
+            .items {
+              padding: 0 16px;
+            }
+
+            .cart-item {
+              padding: 18px 0;
+              grid-template-columns: 78px minmax(0, 1fr);
+              gap: 11px;
+              align-items: start;
+            }
+
+            .item-thumb {
+              width: 78px;
+            }
+
+            .item-thumb.is-custom-text {
+              padding: 10px;
+            }
+
+            .item-thumb.is-custom-text::before {
+              inset: 6px;
+            }
+
+            .item-thumb.is-custom-text > span {
+              max-width: 92%;
+              font-size: 10px;
+            }
+
+            .item-main {
+              min-width: 0;
+              overflow: hidden;
+            }
+
+            .item-heading {
+              gap: 6px;
+            }
+
+            .item-heading h3 {
+              font-size: 17px;
+              line-height: 1;
+              overflow-wrap: anywhere;
+            }
+
+            .unit-price {
+              margin-top: 4px;
+              font-size: 11px;
+            }
+
+            .remove-button {
+              width: 24px;
+              height: 24px;
+              font-size: 22px;
+            }
+
+            .item-options {
+              margin-top: 10px;
+              gap: 4px;
+              font-size: 10px;
+            }
+
+            .item-options div {
+              grid-template-columns: 48px minmax(0, 1fr);
+              gap: 6px;
+            }
+
+            .item-options dt,
+            .item-options dd {
+              min-width: 0;
+              overflow-wrap: anywhere;
+            }
+
+            .item-footer {
+              margin-top: 12px;
+              flex-direction: column;
+              align-items: flex-start;
+              justify-content: flex-start;
+              gap: 9px;
+            }
+
+            .item-footer > strong {
+              max-width: 100%;
+              font-size: 11px;
+              overflow-wrap: anywhere;
+            }
+
+            .quantity-control {
+              grid-template-columns: 30px 34px 30px;
+              min-height: 34px;
+            }
+
+            .drawer-footer {
+              padding: 15px 18px max(18px, env(safe-area-inset-bottom));
+            }
+
+            .subtotal-row {
+              gap: 10px;
+              font-size: 13px;
+            }
+
+            .subtotal-row strong {
+              font-size: 20px;
+              text-align: right;
+            }
+
+            .footer-note {
+              margin: 5px 0 11px;
+              font-size: 9px;
+            }
+
+            .cart-status {
+              min-height: 0;
+              margin-bottom: 8px;
+            }
+
+            .drawer-actions {
+              gap: 7px;
+            }
+
+            .drawer-actions button {
+              min-height: 44px;
+              padding: 10px;
+              font-size: 10px;
+            }
+          }
+
+          @media (max-width: 360px) {
+            .drawer-header {
+              padding-inline: 14px;
+            }
+
+            .items {
+              padding: 0 13px;
+            }
+
+            .cart-item {
+              grid-template-columns: 70px minmax(0, 1fr);
+              gap: 9px;
+            }
+
+            .item-thumb {
+              width: 70px;
+            }
+
+            .item-heading h3 {
+              font-size: 15px;
+            }
+
+            .item-options {
+              font-size: 9px;
+            }
+
+            .item-options div {
+              grid-template-columns: 43px minmax(0, 1fr);
+            }
+
+            .drawer-footer {
+              padding-inline: 14px;
+            }
           }
         `;
         this.shadowRoot.appendChild(style);
@@ -237,7 +462,7 @@
       this.installQuesoOptimisticCartActions();
     };
 
-    prototype.__quesoOptimisticCartPatchedV2 = true;
+    prototype.__quesoOptimisticCartPatchedV3 = true;
 
     document.querySelectorAll("queso-cart-drawer").forEach((element) => {
       element.installQuesoCartPresentation?.();
@@ -250,7 +475,8 @@
     return;
   }
 
-  baseUrl.searchParams.set("build", "optimistic-cart-4");
+  installFrameViewport();
+  baseUrl.searchParams.set("build", "mobile-cart-5");
   baseUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
