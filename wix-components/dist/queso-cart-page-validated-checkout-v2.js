@@ -6,27 +6,56 @@
     ? new URL("queso-cart-page-dynamic-height-v2.js", scriptUrl)
     : null;
 
+  const CHECKOUT_PENDING_MESSAGE = "__queso_checkout_pending__";
+
   function patch(CartPage) {
     const prototype = CartPage?.prototype;
-    if (!prototype || prototype.__quesoValidatedCheckoutPatchedV2) return;
+    if (!prototype || prototype.__quesoValidatedCheckoutPatchedV3) return;
+
+    const originalRender = prototype.render;
 
     /*
-     * Do not enter the pending state inside the Custom Element click handler.
-     * Velo must first validate the selected delivery date and cart contents.
-     * After validation succeeds, Velo sets the checkout-pending message token,
-     * which the component already converts into the spinner/button state.
+     * Clicking the button only emits the checkout event.
+     * Velo validates the date/cart first, then controls the loading state.
      */
     prototype.startCheckoutFeedback = function startCheckoutFeedback() {
       return true;
     };
 
-    prototype.__quesoValidatedCheckoutPatchedV2 = true;
+    /*
+     * Reset pending state every time the component renders.
+     * This prevents an old loading state from surviving after cart-message
+     * has been cleared by Velo.
+     */
+    prototype.render = function render() {
+      this.checkoutPending =
+        this.value("cart-message", "") === CHECKOUT_PENDING_MESSAGE;
+
+      originalRender.call(this);
+    };
+
+    /*
+     * Keep the button state tied exactly to the current cart-message value.
+     * Empty or normal messages restore Secure checkout immediately.
+     */
+    prototype.feedback = function feedback() {
+      const rawMessage = this.value("cart-message", "");
+      const pending = rawMessage === CHECKOUT_PENDING_MESSAGE;
+
+      this.checkoutPending = pending;
+
+      const status = this.shadowRoot?.querySelector(".status");
+      if (status) {
+        status.textContent = pending ? "" : rawMessage;
+      }
+
+      this.updateCheckoutButton?.();
+    };
+
+    prototype.__quesoValidatedCheckoutPatchedV3 = true;
 
     document.querySelectorAll("queso-cart-page").forEach((element) => {
-      if (element.checkoutPending) {
-        element.checkoutPending = false;
-        element.updateCheckoutButton?.();
-      }
+      element.feedback?.();
     });
   }
 
@@ -35,7 +64,7 @@
     return;
   }
 
-  baseUrl.searchParams.set("validated-checkout", "v2");
+  baseUrl.searchParams.set("validated-checkout", "v3");
   baseUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
