@@ -3,7 +3,7 @@
 
   const scriptUrl = document.currentScript?.src || "";
   const buildUrl = scriptUrl
-    ? new URL("queso-delivery-picker-build.js", scriptUrl)
+    ? new URL("queso-delivery-picker-session-state-v1.js", scriptUrl)
     : null;
 
   if (!buildUrl) {
@@ -11,7 +11,7 @@
     return;
   }
 
-  buildUrl.searchParams.set("build", "delivery-picker-1");
+  buildUrl.searchParams.set("build", "delivery-picker-session-1");
   buildUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
