@@ -41,33 +41,43 @@
         Number(quantityText.textContent || 1)
       );
 
-      const nextQuantity = Math.max(
+      const requestedQuantity = Math.max(
         1,
         Number(button.dataset.cartNextQuantity || currentQuantity)
       );
 
-      if (nextQuantity === currentQuantity) return;
+      if (requestedQuantity === currentQuantity) return;
 
       const unitPriceText = article.querySelector(".unit-price")?.textContent || "";
       const unitPrice = readMoney(unitPriceText);
-      const delta = nextQuantity - currentQuantity;
+      const delta = requestedQuantity - currentQuantity;
 
-      quantityText.textContent = String(nextQuantity);
+      quantityText.textContent = String(requestedQuantity);
 
       const quantityButtons = control.querySelectorAll("[data-cart-quantity]");
-      if (quantityButtons[0]) {
-        quantityButtons[0].dataset.cartNextQuantity = String(
-          Math.max(1, nextQuantity - 1)
-        );
-        quantityButtons[0].disabled = nextQuantity <= 1;
-      }
-      if (quantityButtons[1]) {
-        quantityButtons[1].dataset.cartNextQuantity = String(nextQuantity + 1);
-      }
+
+      /*
+       * Keep the clicked button's current data value until the base event
+       * listener has emitted it to Wix. Update both controls in a microtask
+       * immediately after the click event finishes.
+       */
+      queueMicrotask(() => {
+        if (quantityButtons[0]) {
+          quantityButtons[0].dataset.cartNextQuantity = String(
+            Math.max(1, requestedQuantity - 1)
+          );
+          quantityButtons[0].disabled = requestedQuantity <= 1;
+        }
+        if (quantityButtons[1]) {
+          quantityButtons[1].dataset.cartNextQuantity = String(
+            requestedQuantity + 1
+          );
+        }
+      });
 
       const lineTotal = article.querySelector(".item-footer > strong");
       if (lineTotal && unitPrice > 0) {
-        lineTotal.textContent = formatMoney(unitPrice * nextQuantity);
+        lineTotal.textContent = formatMoney(unitPrice * requestedQuantity);
       }
 
       const count = this.shadowRoot?.querySelector(".drawer-header p");
@@ -120,7 +130,7 @@
     return;
   }
 
-  baseUrl.searchParams.set("build", "optimistic-cart-2");
+  baseUrl.searchParams.set("build", "optimistic-cart-3");
   baseUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
