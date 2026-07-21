@@ -93,7 +93,12 @@
           readRecordValue(initialChoices, option.name)
         );
 
-        if (!reset && confirmed) {
+        /*
+         * Wix may recreate the Custom Element when Velo updates an
+         * attribute. In that case connectedCallback calls this method
+         * with reset=true, so confirmed Wix choices must still win.
+         */
+        if (confirmed) {
           next[option.name] = confirmed;
           return;
         }
