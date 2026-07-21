@@ -3,7 +3,7 @@
 
   const scriptUrl = document.currentScript?.src || "";
   const buildUrl = scriptUrl
-    ? new URL("queso-cart-drawer-build.js", scriptUrl)
+    ? new URL("queso-cart-drawer-production-build.js", scriptUrl)
     : null;
 
   if (!buildUrl) {
