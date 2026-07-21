@@ -5,23 +5,11 @@
   const baseUrl = scriptUrl
     ? new URL("queso-cart-page-dynamic-height-v2.js", scriptUrl)
     : null;
-  const SESSION_KEY = "queso-selected-delivery-date";
   const CHECKOUT_PENDING_MESSAGE = "__queso_checkout_pending__";
-
-  function hasSelectedDeliveryDate() {
-    try {
-      return /^\d{4}-\d{2}-\d{2}$/.test(
-        String(sessionStorage.getItem(SESSION_KEY) || "").trim()
-      );
-    } catch (error) {
-      console.log("Queso cart checkout session state unavailable:", error);
-      return false;
-    }
-  }
 
   function patch(CartPage) {
     const prototype = CartPage?.prototype;
-    if (!prototype || prototype.__quesoLocalCheckoutFeedbackPatchedV1) return;
+    if (!prototype || prototype.__quesoLocalCheckoutFeedbackPatchedV2) return;
 
     const originalFeedback = prototype.feedback;
 
@@ -32,17 +20,31 @@
       this.updateCheckoutButton?.();
     };
 
+    prototype.observeQuesoCheckoutReset = function observeQuesoCheckoutReset() {
+      this.__quesoCheckoutResetObserver?.disconnect();
+
+      this.__quesoCheckoutResetObserver = new MutationObserver((mutations) => {
+        const resetRequested = mutations.some(
+          (mutation) => mutation.type === "attributes" && mutation.attributeName === "checkout-reset"
+        );
+
+        if (resetRequested) {
+          this.clearQuesoLocalCheckoutFeedback();
+        }
+      });
+
+      this.__quesoCheckoutResetObserver.observe(this, {
+        attributes: true,
+        attributeFilter: ["checkout-reset"]
+      });
+    };
+
     /*
-     * Start the visual state locally, inside the component itself.
-     * No Velo attribute update is needed, so Wix does not refresh/flicker
-     * the custom element before navigation.
+     * Always show feedback immediately on click.
+     * Velo validates the date. If validation fails, it sends checkout-reset.
+     * Successful checkout requires no Wix attribute update, so there is no flicker.
      */
     prototype.startCheckoutFeedback = function startCheckoutFeedback() {
-      if (!hasSelectedDeliveryDate()) {
-        this.clearQuesoLocalCheckoutFeedback();
-        return true;
-      }
-
       if (this.__quesoLocalCheckoutActive) {
         return false;
       }
@@ -63,7 +65,6 @@
       const rawMessage = this.value("cart-message", "");
 
       if (rawMessage === CHECKOUT_PENDING_MESSAGE) {
-        /* Backward compatibility only. The Velo page should no longer send this. */
         this.__quesoLocalCheckoutActive = true;
         this.checkoutPending = true;
         this.updateCheckoutButton?.();
@@ -82,13 +83,17 @@
       }
     };
 
-    prototype.__quesoLocalCheckoutFeedbackPatchedV1 = true;
+    const originalConnectedCallback = prototype.connectedCallback;
+    prototype.connectedCallback = function connectedCallback() {
+      originalConnectedCallback.call(this);
+      this.observeQuesoCheckoutReset();
+    };
+
+    prototype.__quesoLocalCheckoutFeedbackPatchedV2 = true;
 
     document.querySelectorAll("queso-cart-page").forEach((element) => {
-      const rawMessage = element.value?.("cart-message", "") || "";
-      if (rawMessage !== CHECKOUT_PENDING_MESSAGE) {
-        element.clearQuesoLocalCheckoutFeedback?.();
-      }
+      element.observeQuesoCheckoutReset?.();
+      element.clearQuesoLocalCheckoutFeedback?.();
     });
   }
 
@@ -97,7 +102,7 @@
     return;
   }
 
-  baseUrl.searchParams.set("local-checkout-feedback", "v1");
+  baseUrl.searchParams.set("local-checkout-feedback", "v2");
   baseUrl.searchParams.set("cache", String(Date.now()));
 
   const script = document.createElement("script");
@@ -108,7 +113,7 @@
     patch(customElements.get("queso-cart-page"));
   };
   script.onerror = () => {
-    console.error("Queso cart local checkout feedback: build failed to load.");
+    console.error("Queso cart local checkout feedback: base build failed to load.");
   };
 
   document.head.appendChild(script);
