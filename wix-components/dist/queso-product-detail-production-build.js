@@ -28,6 +28,7 @@
     if (!prototype || prototype.__quesoProductionBuildPatched) return;
 
     const originalAttributeChanged = prototype.attributeChangedCallback;
+    const originalBindCanvasEvents = prototype.bindCanvasEvents;
 
     prototype.updateQuesoCartFeedback = function updateQuesoCartFeedback() {
       const cartState = this.value("cart-state", "idle").toLowerCase();
@@ -63,6 +64,46 @@
       });
     };
 
+    prototype.beginQuesoLocalAddFeedback = function beginQuesoLocalAddFeedback() {
+      if (this.__quesoLocalAddResetTimer) {
+        clearTimeout(this.__quesoLocalAddResetTimer);
+      }
+
+      const status = this.shadowRoot?.querySelector(".status");
+      if (status) {
+        status.classList.remove("idle", "success", "error");
+        status.classList.add("adding");
+        status.textContent = "Adding your cake…";
+      }
+
+      const button = this.shadowRoot?.querySelector("[data-add-to-cart]");
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Adding…";
+      }
+
+      this.__quesoLocalAddResetTimer = setTimeout(() => {
+        this.__quesoLocalAddResetTimer = 0;
+        this.updateQuesoCartFeedback();
+      }, 6000);
+    };
+
+    prototype.installQuesoLocalAddFeedback = function installQuesoLocalAddFeedback() {
+      const button = this.shadowRoot?.querySelector("[data-add-to-cart]");
+      if (!button || button.dataset.quesoLocalAddFeedback === "true") return;
+
+      button.dataset.quesoLocalAddFeedback = "true";
+      button.addEventListener("click", () => {
+        if (this.isEditorPreview || !this.isAvailable) return;
+        this.beginQuesoLocalAddFeedback();
+      });
+    };
+
+    prototype.bindCanvasEvents = function bindCanvasEvents() {
+      originalBindCanvasEvents.call(this);
+      this.installQuesoLocalAddFeedback();
+    };
+
     prototype.attributeChangedCallback = function attributeChangedCallback(
       name,
       oldValue,
@@ -85,6 +126,7 @@
 
     document.querySelectorAll("queso-product-detail").forEach((element) => {
       element.updateQuesoCartFeedback?.();
+      element.installQuesoLocalAddFeedback?.();
     });
   }
 
@@ -95,7 +137,7 @@
 
   const script = document.createElement("script");
   const target = new URL(canvasUrl);
-  target.searchParams.set("build", "production-1");
+  target.searchParams.set("build", "production-2");
   target.searchParams.set("cache", String(Date.now()));
   script.src = target.href;
   script.async = false;
