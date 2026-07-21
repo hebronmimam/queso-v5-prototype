@@ -29,6 +29,31 @@
 
     const originalAttributeChanged = prototype.attributeChangedCallback;
     const originalBindCanvasEvents = prototype.bindCanvasEvents;
+    const originalUpdateCanvasCustomizer = prototype.updateCanvasV5Customizer;
+
+    prototype.centerQuesoCanvasPreviewMessage = function centerQuesoCanvasPreviewMessage() {
+      const message = this.shadowRoot?.querySelector("[data-canvas-preview-message]");
+      if (!message) return;
+
+      message.style.setProperty("position", "absolute", "important");
+      message.style.setProperty("top", "42px", "important");
+      message.style.setProperty("right", "42px", "important");
+      message.style.setProperty("bottom", "42px", "important");
+      message.style.setProperty("left", "42px", "important");
+      message.style.setProperty("width", "auto", "important");
+      message.style.setProperty("height", "auto", "important");
+      message.style.setProperty("display", "flex", "important");
+      message.style.setProperty("align-items", "center", "important");
+      message.style.setProperty("justify-content", "center", "important");
+      message.style.setProperty("padding", "22px", "important");
+      message.style.setProperty("text-align", "center", "important");
+      message.style.setProperty("transform", "none", "important");
+    };
+
+    prototype.updateCanvasV5Customizer = function updateCanvasV5Customizer() {
+      originalUpdateCanvasCustomizer.call(this);
+      this.centerQuesoCanvasPreviewMessage();
+    };
 
     prototype.updateQuesoCartFeedback = function updateQuesoCartFeedback() {
       const cartState = this.value("cart-state", "idle").toLowerCase();
@@ -102,6 +127,7 @@
     prototype.bindCanvasEvents = function bindCanvasEvents() {
       originalBindCanvasEvents.call(this);
       this.installQuesoLocalAddFeedback();
+      this.centerQuesoCanvasPreviewMessage();
     };
 
     prototype.attributeChangedCallback = function attributeChangedCallback(
@@ -127,6 +153,7 @@
     document.querySelectorAll("queso-product-detail").forEach((element) => {
       element.updateQuesoCartFeedback?.();
       element.installQuesoLocalAddFeedback?.();
+      element.centerQuesoCanvasPreviewMessage?.();
     });
   }
 
@@ -137,7 +164,7 @@
 
   const script = document.createElement("script");
   const target = new URL(canvasUrl);
-  target.searchParams.set("build", "production-2");
+  target.searchParams.set("build", "production-3");
   target.searchParams.set("cache", String(Date.now()));
   script.src = target.href;
   script.async = false;
