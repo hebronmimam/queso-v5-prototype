@@ -55,6 +55,30 @@
     const prototype = ProductDetail.prototype;
     if (prototype.__quesoSelectionRuntimePatched) return true;
 
+    const originalSetAttribute = prototype.setAttribute;
+
+    prototype.setAttribute = function setAttribute(name, value) {
+      const attributeName = String(name || "").toLowerCase();
+      const attributeValue = String(value ?? "").trim();
+
+      /*
+       * The base component clears availability-data to {} immediately
+       * after every option click. Wix then treats that attribute change
+       * as a fresh render and the UI visibly jumps back to its defaults.
+       * Keep the current availability state until Velo returns the real
+       * response for the selected choices.
+       */
+      if (
+        attributeName === "availability-data" &&
+        attributeValue === "{}" &&
+        this.hasAttribute("product-data")
+      ) {
+        return;
+      }
+
+      return originalSetAttribute.call(this, name, value);
+    };
+
     prototype.syncSelections = function syncSelections(reset) {
       const product = this.product;
       if (!product) return;
@@ -93,11 +117,6 @@
           readRecordValue(initialChoices, option.name)
         );
 
-        /*
-         * Wix may recreate the Custom Element when Velo updates an
-         * attribute. In that case connectedCallback calls this method
-         * with reset=true, so confirmed Wix choices must still win.
-         */
         if (confirmed) {
           next[option.name] = confirmed;
           return;
