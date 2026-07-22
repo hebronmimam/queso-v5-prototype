@@ -45,7 +45,10 @@
         ? "Choose options"
         : originalLabel;
 
-      if (displayLabel) {
+      if (
+        displayLabel &&
+        String(link.textContent || "").trim() !== displayLabel
+      ) {
         link.textContent = displayLabel;
       }
 
