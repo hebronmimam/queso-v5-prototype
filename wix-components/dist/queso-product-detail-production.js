@@ -4,7 +4,8 @@
   const scriptUrl = document.currentScript?.src || "";
   const buildFiles = [
     "queso-product-detail-production-build.js",
-    "queso-product-detail-four-line-message-v1.js"
+    "queso-product-detail-four-line-message-v1.js",
+    "queso-product-detail-requested-flavor-v1.js"
   ];
 
   if (!scriptUrl) {
