@@ -203,7 +203,11 @@
                 href="${this.escape(item.primaryUrl)}"
                 data-primary-action="${index}"
               >${this.escape(item.primaryLabel)}</a>
-              <a class="button" href="${this.escape(item.secondaryUrl)}">${this.escape(item.secondaryLabel)}</a>
+              <a
+                class="button"
+                href="${this.escape(item.secondaryUrl)}"
+                data-secondary-action="${index}"
+              >${this.escape(item.secondaryLabel)}</a>
             </div>
           </div>
         </article>
@@ -512,11 +516,31 @@
               <p class="eyebrow">${this.escape(this.value("eyebrow", "Choose your mood"))}</p>
               <h2 id="queso-menu-title">${this.escape(this.value("title", "The menu."))}</h2>
             </div>
-            <a class="text-link" href="${this.escape(this.value("link-url", "/cakes"))}">${this.escape(this.value("link-label", "See all cake types →"))}</a>
+            <a
+              class="text-link"
+              href="${this.escape(this.value("link-url", "/cakes"))}"
+              data-section-action
+            >${this.escape(this.value("link-label", "See all cake types →"))}</a>
           </header>
           <div class="menu-track">${cards}</div>
         </section>
       `;
+    }
+
+    dispatchNavigation(item, url, action, index) {
+      this.dispatchEvent(
+        new CustomEvent("queso-menu-navigate", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            index,
+            action,
+            url,
+            productId: item?.productId || "",
+            productName: item?.productName || ""
+          }
+        })
+      );
     }
 
     bindEvents() {
@@ -524,7 +548,15 @@
         link.addEventListener("click", (event) => {
           const index = Number(link.dataset.primaryAction);
           const item = this.items[index];
-          if (!item || !item.primaryLabel.toLowerCase().includes("add")) return;
+          if (!item) return;
+
+          const isAddAction = item.primaryLabel.toLowerCase().includes("add");
+
+          if (!isAddAction) {
+            event.preventDefault();
+            this.dispatchNavigation(item, item.primaryUrl, "primary", index);
+            return;
+          }
 
           const bridgeEnabled = ["true", "1", "on", "yes"].includes(
             (this.getAttribute("cart-bridge") || "").toLowerCase()
@@ -555,6 +587,30 @@
           }
         });
       });
+
+      this.shadowRoot.querySelectorAll("[data-secondary-action]").forEach((link) => {
+        link.addEventListener("click", (event) => {
+          const index = Number(link.dataset.secondaryAction);
+          const item = this.items[index];
+          if (!item) return;
+
+          event.preventDefault();
+          this.dispatchNavigation(item, item.secondaryUrl, "secondary", index);
+        });
+      });
+
+      const sectionLink = this.shadowRoot.querySelector("[data-section-action]");
+      if (sectionLink) {
+        sectionLink.addEventListener("click", (event) => {
+          event.preventDefault();
+          this.dispatchNavigation(
+            null,
+            this.value("link-url", "/cakes"),
+            "section",
+            -1
+          );
+        });
+      }
     }
   }
 
