@@ -2,27 +2,38 @@
   "use strict";
 
   const scriptUrl = document.currentScript?.src || "";
-  const buildUrl = scriptUrl
-    ? new URL("queso-product-detail-production-build.js", scriptUrl)
-    : null;
+  const buildFiles = [
+    "queso-product-detail-production-build.js",
+    "queso-product-detail-four-line-message-v1.js"
+  ];
 
-  if (!buildUrl) {
-    console.error("Queso product production loader: unable to resolve build URL.");
+  if (!scriptUrl) {
+    console.error("Queso product production loader: unable to resolve build URLs.");
     return;
   }
 
-  /*
-   * Keep this Wix-facing URL permanent. The internal build is fetched
-   * with a cache buster, so future fixes can be deployed without asking
-   * Wix users to replace the Custom Element URL again.
-   */
-  buildUrl.searchParams.set("cache", String(Date.now()));
+  function loadBuild(index) {
+    if (index >= buildFiles.length) return;
 
-  const script = document.createElement("script");
-  script.src = buildUrl.href;
-  script.async = false;
-  script.onerror = () => {
-    console.error("Queso product production loader: build failed to load.");
-  };
-  document.head.appendChild(script);
+    const target = new URL(buildFiles[index], scriptUrl);
+    target.searchParams.set("cache", String(Date.now()));
+
+    const script = document.createElement("script");
+    script.src = target.href;
+    script.async = false;
+    script.addEventListener("load", () => loadBuild(index + 1), { once: true });
+    script.addEventListener(
+      "error",
+      () => {
+        console.error(
+          `Queso product production loader: ${buildFiles[index]} failed to load.`
+        );
+      },
+      { once: true }
+    );
+
+    document.head.appendChild(script);
+  }
+
+  loadBuild(0);
 })();
